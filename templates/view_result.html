@@ -1,57 +1,60 @@
 {% extends "base.html" %}
 
+{% block title %}Student Result{% endblock %}
+
 {% block content %}
-<div class="container">
-    <div class="card mt-4">
-        <div class="card-header bg-success text-white">
-            <h4>Result for {{ student.name }} (Class {{ student.class }}, Roll No: {{ student.roll_number }})</h4>
+<div class="container mt-5">
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-primary text-white text-center">
+            <h4 class="mb-0">Student Result</h4>
         </div>
         <div class="card-body">
+
+            <div class="row mb-3">
+                <div class="col-md-4"><strong>Name:</strong> {{ student.name }}</div>
+                <div class="col-md-4"><strong>Class:</strong> {{ student.class }}</div>
+                <div class="col-md-4"><strong>Roll Number:</strong> {{ student.roll_number }}</div>
+            </div>
+
             <div class="table-responsive">
-                <table class="table table-bordered">
+                <table class="table table-striped table-hover">
                     <thead class="table-dark">
                         <tr>
                             <th>Subject</th>
-                            <th>Marks Obtained</th>
-                            <th>Total Marks</th>
-                            <th>Percentage</th>
+                            <th>Marks</th>
+                            <th>Grade</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for subject in results %}
                         <tr>
                             <td>{{ subject.subject }}</td>
-                            <td>{{ subject.marks_obtained }}</td>
-                            <td>{{ subject.total_marks }}</td>
+                            <td>{{ subject.marks }}</td>
                             <td>
-                                {% if subject.total_marks|float > 0 %}
-                                    {{ "%.2f"|format((subject.marks_obtained | float) / (subject.total_marks | float) * 100) }}%
+                                {% if subject.marks >= 90 %}
+                                    A+
+                                {% elif subject.marks >= 80 %}
+                                    A
+                                {% elif subject.marks >= 70 %}
+                                    B+
+                                {% elif subject.marks >= 60 %}
+                                    B
+                                {% elif subject.marks >= 50 %}
+                                    C
                                 {% else %}
-                                    0%
+                                    F
                                 {% endif %}
                             </td>
                         </tr>
                         {% endfor %}
-                        <tr class="table-info">
-                            <td><strong>Total</strong></td>
-                            <td><strong>{{ results | sum(attribute='marks_obtained') }}</strong></td>
-                            <td><strong>{{ results | sum(attribute='total_marks') }}</strong></td>
-                            <td>
-                                <strong>
-                                    {% set total_obtained = results | sum(attribute='marks_obtained') | float %}
-                                    {% set total_max = results | sum(attribute='total_marks') | float %}
-                                    {% if total_max > 0 %}
-                                        {{ "%.2f"|format((total_obtained / total_max) * 100) }}%
-                                    {% else %}
-                                        0%
-                                    {% endif %}
-                                </strong>
-                            </td>
-                        </tr>
                     </tbody>
                 </table>
             </div>
-            <a href="{{ url_for('home') }}" class="btn btn-primary mt-3">Back to Home</a>
+
+            <div class="text-center mt-4">
+                <a href="{{ url_for('results') }}" class="btn btn-secondary">Search Another</a>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary">Back to Dashboard</a>
+            </div>
         </div>
     </div>
 </div>
