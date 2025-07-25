@@ -23,14 +23,24 @@
                             <td>{{ subject.subject }}</td>
                             <td>{{ subject.marks_obtained }}</td>
                             <td>{{ subject.total_marks }}</td>
-                            <td>{{ ((subject.marks_obtained|float / subject.total_marks|float) * 100)|round(2) }}%</td>
+                            <td>{{ ((subject.marks_obtained|float / subject.total_marks|float) * 100 | round(2) }}%</td>
                         </tr>
                         {% endfor %}
                         <tr class="table-info">
                             <td><strong>Total</strong></td>
-                            <td><strong>{{ results|sum(attribute='marks_obtained') }}</strong></td>
-                            <td><strong>{{ results|sum(attribute='total_marks') }}</strong></td>
-                            <td><strong>{{ ((results|sum(attribute='marks_obtained') / results|sum(attribute='total_marks')) * 100 }}%</strong></td>
+                            <td><strong>{{ results | sum(attribute='marks_obtained') }}</strong></td>
+                            <td><strong>{{ results | sum(attribute='total_marks') }}</strong></td>
+                            <td>
+                                <strong>
+                                    {% set total_obtained = results | sum(attribute='marks_obtained') %}
+                                    {% set total_max = results | sum(attribute='total_marks') %}
+                                    {% if total_max > 0 %}
+                                        {{ (total_obtained / total_max * 100) | round(2) }}%
+                                    {% else %}
+                                        0%
+                                    {% endif %}
+                                </strong>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
