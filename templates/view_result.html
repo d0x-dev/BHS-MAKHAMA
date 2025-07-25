@@ -23,7 +23,13 @@
                             <td>{{ subject.subject }}</td>
                             <td>{{ subject.marks_obtained }}</td>
                             <td>{{ subject.total_marks }}</td>
-                            <td>{{ ((subject.marks_obtained|float / subject.total_marks|float) * 100 | round(2) }}%</td>
+                            <td>
+                                {% if subject.total_marks > 0 %}
+                                    {{ "%.2f"|format((subject.marks_obtained|float / subject.total_marks|float) * 100 }}%
+                                {% else %}
+                                    0%
+                                {% endif %}
+                            </td>
                         </tr>
                         {% endfor %}
                         <tr class="table-info">
@@ -35,7 +41,7 @@
                                     {% set total_obtained = results | sum(attribute='marks_obtained') %}
                                     {% set total_max = results | sum(attribute='total_marks') %}
                                     {% if total_max > 0 %}
-                                        {{ (total_obtained / total_max * 100) | round(2) }}%
+                                        {{ "%.2f"|format((total_obtained / total_max) * 100) }}%
                                     {% else %}
                                         0%
                                     {% endif %}
