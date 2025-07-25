@@ -517,23 +517,6 @@ def syllabus():
 def account():
     return render_template('account.html', username=session.get('username'))
 
-@app.route('/', methods=['GET', 'POST'])
-def home():
-    return '''
-    <form method="post" action="/result" class="container mt-5">
-        <h3>Check Student Result</h3>
-        <div class="mb-3">
-            <label>Class:</label>
-            <input type="text" name="student_class" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label>Roll Number:</label>
-            <input type="text" name="roll_number" class="form-control" required>
-        </div>
-        <button type="submit" class="btn btn-success">View Result</button>
-    </form>
-    '''
-
 @app.route('/result', methods=['POST'])
 def result():
     student_class = request.form['student_class']
