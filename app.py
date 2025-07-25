@@ -30,6 +30,9 @@ FAILED_ATTEMPTS_FILE = 'failed_attempts.json'
 USERS_FILE = 'users.json'
 PENDING_FILE = 'pending_users.json'
 DECLINED_FILE = 'declined_users.json'
+RESULTS_FILE = 'student_results.json'
+DOC_REQUESTS_FILE = 'doc_requests.json'
+SENT_DOCS_FILE = 'sent_docs.json'
 
 def load_json(file_path):
     try:
@@ -513,6 +516,237 @@ def syllabus():
 @login_required
 def account():
     return render_template('account.html', username=session.get('username'))
+
+# Add these new routes after your existing routes
+@app.route('/results', methods=['GET', 'POST'])
+@login_required
+def results():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        class_name = request.form.get('class')
+        roll_number = request.form.get('roll_number')
+        
+        # Load results data
+        try:
+            with open(RESULTS_FILE, 'r') as f:
+                results_data = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            results_data = []
+            
+        # Find matching results
+        student_results = [
+            r for r in results_data 
+            if r['name'].lower() == name.lower() and 
+               r['class'].lower() == class_name.lower() and 
+               r['roll_number'] == roll_number
+        ]
+        
+        if student_results:
+            return render_template('view_result.html', 
+                                results=student_results[0]['subjects'],
+                                student=student_results[0])
+        else:
+            flash('No results found for the provided details', 'warning')
+    
+    return render_template('get_results.html')
+
+@app.route('/doc_request', methods=['GET', 'POST'])
+@login_required
+def doc_request():
+    if request.method == 'POST':
+        doc_name = request.form.get('doc_name')
+        name = request.form.get('name')
+        class_name = request.form.get('class')
+        roll_number = request.form.get('roll_number')
+        father_name = request.form.get('father_name')
+        
+        # Load existing requests
+        try:
+            with open(DOC_REQUESTS_FILE, 'r') as f:
+                requests = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            requests = []
+            
+        # Add new request
+        new_request = {
+            'username': session['username'],
+            'doc_name': doc_name,
+            'name': name,
+            'class': class_name,
+            'roll_number': roll_number,
+            'father_name': father_name,
+            'date': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'status': 'pending'
+        }
+        
+        requests.append(new_request)
+        
+        # Save back to file
+        with open(DOC_REQUESTS_FILE, 'w') as f:
+            json.dump(requests, f, indent=2)
+            
+        flash('Your document request has been submitted to admin', 'success')
+        return redirect(url_for('home'))
+    
+    return render_template('doc_request.html'))
+
+@app.route('/admin/results', methods=['GET', 'POST'])
+@admin_required
+def admin_results():
+    if request.method == 'POST':
+        # Handle form submission for adding results
+        name = request.form.get('name')
+        class_name = request.form.get('class')
+        roll_number = request.form.get('roll_number')
+        
+        # Get subjects data
+        subjects = []
+        for key in request.form:
+            if key.startswith('subject_name_'):
+                index = key.split('_')[-1]
+                subject_name = request.form.get(f'subject_name_{index}')
+                marks_obtained = request.form.get(f'marks_obtained_{index}')
+                total_marks = request.form.get(f'total_marks_{index}')
+                
+                if subject_name and marks_obtained and total_marks:
+                    subjects.append({
+                        'subject': subject_name,
+                        'marks_obtained': marks_obtained,
+                        'total_marks': total_marks
+                    })
+        
+        # Load existing results
+        try:
+            with open(RESULTS_FILE, 'r') as f:
+                results_data = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            results_data = []
+            
+        # Check if student already has results
+        existing_index = -1
+        for i, result in enumerate(results_data):
+            if (result['name'].lower() == name.lower() and 
+                result['class'].lower() == class_name.lower() and 
+                result['roll_number'] == roll_number):
+                existing_index = i
+                break
+                
+        # Update or add new result
+        new_result = {
+            'name': name,
+            'class': class_name,
+            'roll_number': roll_number,
+            'date': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'subjects': subjects
+        }
+        
+        if existing_index >= 0:
+            results_data[existing_index] = new_result
+        else:
+            results_data.append(new_result)
+            
+        # Save back to file
+        with open(RESULTS_FILE, 'w') as f:
+            json.dump(results_data, f, indent=2)
+            
+        flash('Results saved successfully!', 'success')
+        return redirect(url_for('admin_results'))
+    
+    # Load existing results for display
+    try:
+        with open(RESULTS_FILE, 'r') as f:
+            results_data = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        results_data = []
+        
+    return render_template('admin/results.html', results=results_data)
+
+@app.route('/admin/doc_requests')
+@admin_required
+def admin_doc_requests():
+    # Load document requests
+    try:
+        with open(DOC_REQUESTS_FILE, 'r') as f:
+            requests = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        requests = []
+        
+    return render_template('admin/doc_requests.html', requests=requests)
+
+@app.route('/admin/send_doc/<int:request_id>', methods=['GET', 'POST'])
+@admin_required
+def send_doc(request_id):
+    # Load document requests
+    try:
+        with open(DOC_REQUESTS_FILE, 'r') as f:
+            requests = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        requests = []
+        
+    # Find the specific request
+    if request_id >= len(requests):
+        flash('Invalid request ID', 'danger')
+        return redirect(url_for('admin_doc_requests'))
+    
+    doc_request = requests[request_id]
+    
+    if request.method == 'POST':
+        file = request.files.get('file')
+        admin_name = request.form.get('admin_name')
+        notes = request.form.get('notes')
+        
+        if file and allowed_file(file.filename):
+            filename = secure_filename(f"doc_{doc_request['doc_name']}_{file.filename}")
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+            
+            # Load sent docs
+            try:
+                with open(SENT_DOCS_FILE, 'r') as f:
+                    sent_docs = json.load(f)
+            except (FileNotFoundError, json.JSONDecodeError):
+                sent_docs = []
+                
+            # Add new sent doc
+            sent_docs.append({
+                'request_id': request_id,
+                'username': doc_request['username'],
+                'doc_name': doc_request['doc_name'],
+                'filename': filename,
+                'admin_name': admin_name,
+                'notes': notes,
+                'date': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            })
+            
+            # Save sent docs
+            with open(SENT_DOCS_FILE, 'w') as f:
+                json.dump(sent_docs, f, indent=2)
+                
+            # Update request status
+            requests[request_id]['status'] = 'completed'
+            with open(DOC_REQUESTS_FILE, 'w') as f:
+                json.dump(requests, f, indent=2)
+                
+            flash('Document sent successfully!', 'success')
+            return redirect(url_for('admin_doc_requests'))
+        else:
+            flash('Invalid file type', 'danger')
+    
+    return render_template('admin/send_doc.html', doc_request=doc_request)
+
+@app.route('/my_docs')
+@login_required
+def my_docs():
+    # Load sent docs for this user
+    try:
+        with open(SENT_DOCS_FILE, 'r') as f:
+            all_docs = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        all_docs = []
+        
+    user_docs = [doc for doc in all_docs if doc['username'] == session['username']]
+    
+    return render_template('my_docs.html', docs=user_docs)
 
 @app.route('/notifications')
 @login_required
