@@ -1,18 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Home - GOVT. BOYS HIGH SCHOOL PETH MAKHAMA{% endblock %}
 
-{# 
-  ========================================================================
-  ANDROID-STYLE, HIGHLY POLISHED HOME / INDEX TEMPLATE
-  - Keeps your OLD UI concepts (hero, chips, quick links, h-scroll cards)
-  - Keeps reveal-on-scroll animation
-  - Fixes the About icon visibility in light mode
-  - Plenty of comments so you (or future you) can tweak easily
-  - Intentionally verbose (350+ lines) per your request
-  ========================================================================
-#}
-
-{% block content %}
 <style>
 /* =========================================================================
    THEME TOKENS (scoped to this page)
@@ -339,7 +327,7 @@
 </div>
 
 <!-- =========================================================================
-     QUICK LINKS (GRID) - Tappable tiles, no “Open” buttons
+     QUICK LINKS (GRID) - Tappable tiles, no "Open" buttons
      ========================================================================= -->
 <section class="mb-4 reveal">
   <h2 class="quick-links-title">Quick Links</h2>
@@ -361,6 +349,24 @@
       </div>
       <p class="quick-link-name">Notifications</p>
       <small>Latest announcements</small>
+    </a>
+
+    <!-- Results -->
+    <a href="{{ url_for('results') }}" class="quick-link">
+      <div class="quick-link-icon" style="background:#20c997; color:#fff;">
+        <i class="bi bi-clipboard-data"></i>
+      </div>
+      <p class="quick-link-name">Results</p>
+      <small>Check your marks</small>
+    </a>
+
+    <!-- Document Request -->
+    <a href="{{ url_for('doc_request') }}" class="quick-link">
+      <div class="quick-link-icon" style="background:#6f42c1; color:#fff;">
+        <i class="bi bi-file-earmark-arrow-down"></i>
+      </div>
+      <p class="quick-link-name">Get Docs</p>
+      <small>Request documents</small>
     </a>
 
     <!-- Contact -->
