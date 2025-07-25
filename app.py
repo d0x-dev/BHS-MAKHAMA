@@ -524,30 +524,35 @@ def results():
         name = request.form.get('name')
         class_name = request.form.get('class')
         roll_number = request.form.get('roll_number')
-        
+
         try:
             with open(RESULTS_FILE, 'r') as f:
                 results_data = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
             results_data = []
 
-        # Match student result
-        student_result = next((
-            r for r in results_data 
-            if r['name'].strip().lower() == name.strip().lower() and 
-               r['class'].strip().lower() == class_name.strip().lower() and 
-               r['roll_number'].strip() == roll_number.strip()
-        ), None)
+        # Support single result or a list of results
+        if isinstance(results_data, dict):
+            results_data = [results_data]
 
-        if student_result:
-            return render_template('view_result.html', 
-                                   student=student_result, 
-                                   results=student_result.get('subjects', []))
+        # Match student
+        student_results = [
+            r for r in results_data
+            if r.get('name', '').lower() == name.lower() and
+               r.get('class', '').lower() == class_name.lower() and
+               str(r.get('roll_number', '')).strip() == roll_number.strip()
+        ]
+
+        if student_results:
+            student = student_results[0]
+            return render_template('view_result.html',
+                                   student=student,
+                                   results=student.get('subjects', []))
         else:
-            flash('❌ No results found for the provided details.', 'danger')
-            return redirect(url_for('results'))
+            flash('No results found for the provided details', 'warning')
 
     return render_template('get_results.html')
+
 
 
 @app.route('/doc_request', methods=['GET', 'POST'])
