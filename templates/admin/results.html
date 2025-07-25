@@ -1,251 +1,58 @@
-{% extends "base.html" %}
-{% set hide_header = True %}
-
-{% block title %}Manage Results - Admin{% endblock %}
+{% extends "admin/base_admin.html" %}
 
 {% block content %}
-<style>
-  .result-card {
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
-    overflow: hidden;
-  }
-  .result-header {
-    background: linear-gradient(135deg, #0d6efd 0%, #4e87ff 100%);
-    color: white;
-    padding: 15px;
-  }
-  .student-pill {
-    background: #f8f9fa;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 10px;
-    position: relative;
-  }
-  .remove-student {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background: #dc3545;
-    color: white;
-    border: none;
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .subject-row {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-  .btn-add {
-    background: #0d6efd;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 8px 15px;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-  }
-  .btn-submit {
-    background: #28a745;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 20px;
-    font-weight: 500;
-  }
-</style>
-
 <div class="container py-4">
-  <h2 class="text-center mb-4">Manage Results</h2>
-  
-  <div class="result-card">
-    <div class="result-header">
-      <h4><i class="bi bi-plus-circle me-2"></i> Add New Result</h4>
-    </div>
-    <div class="p-3">
-      <form method="POST" id="resultForm">
-        <div class="row mb-3">
-          <div class="col-md-4">
-            <label class="form-label">Result Name</label>
-            <input type="text" name="exam_name" class="form-control" required>
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">Exam Date</label>
-            <input type="date" name="exam_date" class="form-control" required>
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">Class</label>
-            <input type="text" name="class" class="form-control" required>
-          </div>
-        </div>
-        
-        <h5 class="mt-4 mb-3">Students</h5>
-        <div id="studentsContainer">
-          <div class="student-pill">
-            <button type="button" class="remove-student" disabled><i class="bi bi-x"></i></button>
-            <div class="row mb-3">
-              <div class="col-md-6">
-                <label class="form-label">Student Name</label>
-                <input type="text" name="student_name_0" class="form-control" required>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Roll Number</label>
-                <input type="text" name="roll_number_0" class="form-control" required>
-              </div>
-            </div>
-            
-            <h6 class="mt-2">Subjects</h6>
-            <div id="subjectsContainer_0">
-              <div class="subject-row">
-                <div class="flex-grow-1">
-                  <input type="text" name="subject_name_0_0" class="form-control" placeholder="Subject" required>
-                </div>
-                <div style="width: 100px;">
-                  <input type="number" name="marks_obtained_0_0" class="form-control" placeholder="Marks" required>
-                </div>
-                <div style="width: 100px;">
-                  <input type="number" name="total_marks_0_0" class="form-control" placeholder="Total" required>
-                </div>
-                <div style="width: 40px;">
-                  <button type="button" class="btn btn-danger remove-subject" disabled><i class="bi bi-x"></i></button>
-                </div>
-              </div>
-            </div>
-            
-            <button type="button" class="btn-add add-subject mt-2" data-student="0">
-              <i class="bi bi-plus"></i> Add Subject
-            </button>
-          </div>
-        </div>
-        
-        <div class="d-flex justify-content-between mt-3">
-          <button type="button" id="addStudent" class="btn-add">
-            <i class="bi bi-plus"></i> Add Student
-          </button>
-          <button type="submit" class="btn-submit">
-            <i class="bi bi-save"></i> Submit Result
-          </button>
-        </div>
-      </form>
-    </div>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Manage Results</h2>
+    <a href="{{ url_for('add_result') }}" class="btn btn-primary">
+      <i class="bi bi-plus-circle"></i> Add New Result
+    </a>
   </div>
   
-  <h3 class="mt-5 mb-3">Existing Results</h3>
   {% if results %}
-    <div class="list-group">
-      {% for exam in results %}
-      <div class="list-group-item">
-        <div class="d-flex justify-content-between align-items-center">
-          <div>
-            <h5>{{ exam.exam_name }}</h5>
-            <div class="text-muted">
-              Class {{ exam.class }} • {{ exam.exam_date }} • {{ exam.students|length }} students
-            </div>
-          </div>
-          <div>{{ exam.created_at.split()[0] }}</div>
-        </div>
-      </div>
-      {% endfor %}
+  <div class="card shadow">
+    <div class="card-header bg-info text-white">
+      <h5 class="mb-0">Available Exams</h5>
     </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Exam Name</th>
+              <th>Class</th>
+              <th>Date</th>
+              <th>Students</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for exam in results %}
+            <tr>
+              <td>{{ exam.exam_name }}</td>
+              <td>{{ exam.class }}</td>
+              <td>{{ exam.exam_date }}</td>
+              <td>{{ exam.students|length }}</td>
+              <td>
+                <a href="{{ url_for('add_student', exam_id=exam.id) }}" class="btn btn-sm btn-success">
+                  <i class="bi bi-person-plus"></i> Add Student
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
   {% else %}
-    <div class="alert alert-info">No results found</div>
+  <div class="card shadow">
+    <div class="card-body text-center py-5">
+      <i class="bi bi-clipboard-x text-muted" style="font-size: 3rem;"></i>
+      <h4 class="mt-3 text-muted">No Exams Found</h4>
+      <p class="text-muted">Create your first exam by clicking the "Add New Result" button</p>
+    </div>
+  </div>
   {% endif %}
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  let studentCount = 1;
-  let subjectCounts = {0: 1};
-  
-  // Add Student
-  document.getElementById('addStudent').addEventListener('click', function() {
-    const container = document.getElementById('studentsContainer');
-    const newStudent = document.createElement('div');
-    newStudent.className = 'student-pill';
-    newStudent.innerHTML = `
-      <button type="button" class="remove-student"><i class="bi bi-x"></i></button>
-      <div class="row mb-3">
-        <div class="col-md-6">
-          <label class="form-label">Student Name</label>
-          <input type="text" name="student_name_${studentCount}" class="form-control" required>
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">Roll Number</label>
-          <input type="text" name="roll_number_${studentCount}" class="form-control" required>
-        </div>
-      </div>
-      
-      <h6 class="mt-2">Subjects</h6>
-      <div id="subjectsContainer_${studentCount}">
-        <div class="subject-row">
-          <div class="flex-grow-1">
-            <input type="text" name="subject_name_${studentCount}_0" class="form-control" placeholder="Subject" required>
-          </div>
-          <div style="width: 100px;">
-            <input type="number" name="marks_obtained_${studentCount}_0" class="form-control" placeholder="Marks" required>
-          </div>
-          <div style="width: 100px;">
-            <input type="number" name="total_marks_${studentCount}_0" class="form-control" placeholder="Total" required>
-          </div>
-          <div style="width: 40px;">
-            <button type="button" class="btn btn-danger remove-subject"><i class="bi bi-x"></i></button>
-          </div>
-        </div>
-      </div>
-      
-      <button type="button" class="btn-add add-subject mt-2" data-student="${studentCount}">
-        <i class="bi bi-plus"></i> Add Subject
-      </button>
-    `;
-    container.appendChild(newStudent);
-    subjectCounts[studentCount] = 1;
-    studentCount++;
-  });
-  
-  // Add Subject
-  document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('add-subject')) {
-      const studentId = e.target.getAttribute('data-student');
-      const container = document.getElementById(`subjectsContainer_${studentId}`);
-      const count = subjectCounts[studentId] || 1;
-      
-      const newSubject = document.createElement('div');
-      newSubject.className = 'subject-row';
-      newSubject.innerHTML = `
-        <div class="flex-grow-1">
-          <input type="text" name="subject_name_${studentId}_${count}" class="form-control" placeholder="Subject" required>
-        </div>
-        <div style="width: 100px;">
-          <input type="number" name="marks_obtained_${studentId}_${count}" class="form-control" placeholder="Marks" required>
-        </div>
-        <div style="width: 100px;">
-          <input type="number" name="total_marks_${studentId}_${count}" class="form-control" placeholder="Total" required>
-        </div>
-        <div style="width: 40px;">
-          <button type="button" class="btn btn-danger remove-subject"><i class="bi bi-x"></i></button>
-        </div>
-      `;
-      container.appendChild(newSubject);
-      subjectCounts[studentId] = count + 1;
-    }
-    
-    // Remove Subject
-    if (e.target.classList.contains('remove-subject')) {
-      e.target.closest('.subject-row').remove();
-    }
-    
-    // Remove Student
-    if (e.target.classList.contains('remove-student')) {
-      e.target.closest('.student-pill').remove();
-    }
-  });
-});
-</script>
 {% endblock %}
