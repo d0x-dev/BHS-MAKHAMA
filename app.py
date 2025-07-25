@@ -517,43 +517,43 @@ def syllabus():
 def account():
     return render_template('account.html', username=session.get('username'))
 
-@app.route('/results', methods=['GET', 'POST'])
-@login_required
-def results():
-    if request.method == 'POST':
-        name = request.form.get('name')
-        class_name = request.form.get('class')
-        roll_number = request.form.get('roll_number')
+@app.route('/', methods=['GET', 'POST'])
+def home():
+    return '''
+    <form method="post" action="/result" class="container mt-5">
+        <h3>Check Student Result</h3>
+        <div class="mb-3">
+            <label>Class:</label>
+            <input type="text" name="student_class" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label>Roll Number:</label>
+            <input type="text" name="roll_number" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-success">View Result</button>
+    </form>
+    '''
 
-        try:
-            with open(RESULTS_FILE, 'r') as f:
-                results_data = json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError):
-            results_data = []
+@app.route('/result', methods=['POST'])
+def result():
+    student_class = request.form['student_class']
+    roll_number = request.form['roll_number']
 
-        # Support single result or a list of results
-        if isinstance(results_data, dict):
-            results_data = [results_data]
+    try:
+        with open('student_results.json') as file:
+            data = json.load(file)
 
-        # Match student
-        student_results = [
-            r for r in results_data
-            if r.get('name', '').lower() == name.lower() and
-               r.get('class', '').lower() == class_name.lower() and
-               str(r.get('roll_number', '')).strip() == roll_number.strip()
-        ]
+        student = next(
+            (s for s in data if s['class'] == student_class and s['roll_number'] == roll_number),
+            None
+        )
 
-        if student_results:
-            student = student_results[0]
-            return render_template('view_result.html',
-                                   student=student,
-                                   results=student.get('subjects', []))
-        else:
-            flash('No results found for the provided details', 'warning')
+        return render_template('view_result.html', student=student)
 
-    return render_template('get_results.html')
-
-
+    except FileNotFoundError:
+        return "student_results.json file not found", 500
+    except Exception as e:
+        return f"Error: {e}", 500
 
 @app.route('/doc_request', methods=['GET', 'POST'])
 @login_required
