@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2 class="my-4">Manage Results</h2>
+    
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h4>Add/Edit Results</h4>
+        </div>
+        <div class="card-body">
+            <form method="POST" id="resultForm">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Student Name</label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Class</label>
+                        <input type="text" name="class" class="form-control" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Roll Number</label>
+                        <input type="text" name="roll_number" class="form-control" required>
+                    </div>
+                </div>
+                
+                <div id="subjectsContainer">
+                    <div class="subject-row row mb-2">
+                        <div class="col-md-4">
+                            <input type="text" name="subject_name_0" class="form-control" placeholder="Subject" required>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="number" name="marks_obtained_0" class="form-control" placeholder="Marks Obtained" required>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="number" name="total_marks_0" class="form-control" placeholder="Total Marks" required>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-danger remove-subject">Remove</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="button" id="addSubject" class="btn btn-secondary mb-3">Add Subject</button>
+                <button type="submit" class="btn btn-primary">Save Results</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header bg-info text-white">
+            <h4>Existing Results</h4>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Class</th>
+                            <th>Roll No</th>
+                            <th>Subjects</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in results %}
+                        <tr>
+                            <td>{{ result.name }}</td>
+                            <td>{{ result.class }}</td>
+                            <td>{{ result.roll_number }}</td>
+                            <td>{{ result.subjects|length }}</td>
+                            <td>{{ result.date.split()[0] }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center">No results found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let subjectCount = 1;
+    
+    // Add subject row
+    document.getElementById('addSubject').addEventListener('click', function() {
+        const newRow = document.createElement('div');
+        newRow.className = 'subject-row row mb-2';
+        newRow.innerHTML = `
+            <div class="col-md-4">
+                <input type="text" name="subject_name_${subjectCount}" class="form-control" placeholder="Subject" required>
+            </div>
+            <div class="col-md-3">
+                <input type="number" name="marks_obtained_${subjectCount}" class="form-control" placeholder="Marks Obtained" required>
+            </div>
+            <div class="col-md-3">
+                <input type="number" name="total_marks_${subjectCount}" class="form-control" placeholder="Total Marks" required>
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-danger remove-subject">Remove</button>
+            </div>
+        `;
+        document.getElementById('subjectsContainer').appendChild(newRow);
+        subjectCount++;
+    });
+    
+    // Remove subject row
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-subject')) {
+            e.target.closest('.subject-row').remove();
+        }
+    });
+});
+</script>
+{% endblock %}
