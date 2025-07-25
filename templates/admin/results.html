@@ -1,122 +1,389 @@
 {% extends "base.html" %}
+{% set hide_header = True %}
+
+{% block title %}Manage Results – Admin{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h2 class="my-4">Manage Results</h2>
-    
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
-            <h4>Add/Edit Results</h4>
-        </div>
-        <div class="card-body">
-            <form method="POST" id="resultForm">
-                <div class="row mb-3">
-                    <div class="col-md-4">
-                        <label class="form-label">Student Name</label>
-                        <input type="text" name="name" class="form-control" required>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Class</label>
-                        <input type="text" name="class" class="form-control" required>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Roll Number</label>
-                        <input type="text" name="roll_number" class="form-control" required>
-                    </div>
-                </div>
-                
-                <div id="subjectsContainer">
-                    <div class="subject-row row mb-2">
-                        <div class="col-md-4">
-                            <input type="text" name="subject_name_0" class="form-control" placeholder="Subject" required>
-                        </div>
-                        <div class="col-md-3">
-                            <input type="number" name="marks_obtained_0" class="form-control" placeholder="Marks Obtained" required>
-                        </div>
-                        <div class="col-md-3">
-                            <input type="number" name="total_marks_0" class="form-control" placeholder="Total Marks" required>
-                        </div>
-                        <div class="col-md-2">
-                            <button type="button" class="btn btn-danger remove-subject">Remove</button>
-                        </div>
-                    </div>
-                </div>
-                
-                <button type="button" id="addSubject" class="btn btn-secondary mb-3">Add Subject</button>
-                <button type="submit" class="btn btn-primary">Save Results</button>
-            </form>
-        </div>
+<style>
+  :root{
+    --ripple-color: rgba(255,255,255,.35);
+    --card-radius: 18px;
+    --soft-shadow: 0 8px 22px rgba(0,0,0,.08);
+    --soft-shadow-dark: 0 8px 22px rgba(0,0,0,.26);
+  }
+
+  /* ------- PAGE LAYOUT ------- */
+  .results-wrapper{
+    padding-bottom: 110px; /* keep clear of fixed admin bottom menu */
+  }
+
+  .page-title{
+    font-weight: 800;
+    letter-spacing: .2px;
+  }
+
+  /* ------- NICE CARDS ------- */
+  .glass-card{
+    border: 0;
+    border-radius: var(--card-radius);
+    box-shadow: var(--soft-shadow);
+    overflow: hidden;
+    transform: translateY(6px);
+    opacity: 0;
+    animation: popIn .45s cubic-bezier(.2,.8,.2,1) forwards .1s;
+  }
+  .glass-card:hover{
+    transform: translateY(4px);
+  }
+  @keyframes popIn{
+    to{ transform: translateY(0); opacity: 1; }
+  }
+
+  .card-header-gradient{
+    background: linear-gradient(135deg,#0d6efd 0%,#5b8cff 100%);
+    color:#fff;
+  }
+  .card-header-info{
+    background: linear-gradient(135deg,#17a2b8 0%,#0dcaf0 100%);
+    color:#fff;
+  }
+
+  /* Subject chips (each subject row as a “pill card”) */
+  .subject-pill{
+    background: var(--bs-tertiary-bg);
+    border-radius: 14px;
+    padding: .75rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,.04);
+    position: relative;
+  }
+  .subject-pill .remove-subject{
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    border: 0;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+  }
+
+  /* Floating Add Subject button (for mobile comfort) */
+  .fab-add{
+    position: fixed;
+    right: 16px;
+    bottom: 110px; /* above bottom admin menu */
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    box-shadow: 0 10px 18px rgba(13,110,253,.28);
+    z-index: 1025;
+  }
+
+  /* Accordion list styling */
+  .accordion-button{
+    font-weight: 600;
+  }
+  .result-badge{
+    border-radius: 999px;
+    padding: .15rem .6rem;
+    font-size:.75rem;
+    background: rgba(13,110,253,.1);
+    color: #0d6efd;
+  }
+
+  /* Ripple */
+  .ripple{
+    position: relative;
+    overflow: hidden;
+  }
+  .ripple span.ripple-ink{
+    position: absolute;
+    border-radius: 50%;
+    transform: scale(0);
+    animation: ripple .6s linear;
+    background-color: var(--ripple-color);
+  }
+  @keyframes ripple{
+    to{
+      transform: scale(4);
+      opacity: 0;
+    }
+  }
+
+  /* Dark mode adjustments */
+  [data-bs-theme="dark"] .glass-card{
+    box-shadow: var(--soft-shadow-dark);
+    background:#1e1e1e;
+  }
+  [data-bs-theme="dark"] .subject-pill{
+    background:#1f1f1f;
+    box-shadow: 0 2px 8px rgba(0,0,0,.18);
+  }
+  [data-bs-theme="dark"] .accordion-item{
+    background:#1e1e1e;
+    color:#f1f1f1;
+  }
+  [data-bs-theme="dark"] .accordion-button{
+    background:#1e1e1e;
+    color:#f1f1f1;
+  }
+  [data-bs-theme="dark"] .accordion-button:not(.collapsed){
+    background:#232323;
+  }
+  [data-bs-theme="dark"] .accordion-body{
+    background:#1c1c1c;
+  }
+
+  /* Inputs bigger touch area on mobile */
+  .form-control, .form-select{
+    min-height: 46px;
+    font-size: 1rem;
+  }
+
+  .section-title{
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom:.75rem;
+  }
+
+  .sticky-action-bar{
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    background: var(--bs-body-bg);
+    padding-top: .75rem;
+  }
+
+  .divider{
+    height:1px;background:rgba(0,0,0,.08);margin:1rem 0;
+  }
+  [data-bs-theme="dark"] .divider{
+    background:rgba(255,255,255,.08);
+  }
+</style>
+
+<div class="container results-wrapper mt-3 mb-4">
+  <h2 class="page-title text-center mb-3">Manage Results</h2>
+
+  <!-- ============ CREATE / EDIT ============ -->
+  <div class="glass-card mb-4">
+    <div class="card-header card-header-gradient">
+      <h4 class="mb-0"><i class="bi bi-ui-checks-grid me-2"></i> Add / Edit Results</h4>
     </div>
-    
-    <div class="card">
-        <div class="card-header bg-info text-white">
-            <h4>Existing Results</h4>
+
+    <div class="card-body">
+      <form method="POST" id="resultForm" autocomplete="off">
+        <!-- Student meta -->
+        <div class="section-title"><i class="bi bi-person-badge me-1"></i> Student Information</div>
+        <div class="row g-2 mb-3">
+          <div class="col-12">
+            <label class="form-label">Student Name</label>
+            <input type="text" name="name" class="form-control" required placeholder="e.g. Ahmed Khan">
+          </div>
+          <div class="col-6">
+          <label class="form-label">Class</label>
+            <input type="text" name="class" class="form-control" required placeholder="e.g. 10th">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Roll Number</label>
+            <input type="text" name="roll_number" class="form-control" required placeholder="e.g. 25">
+          </div>
         </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Class</th>
-                            <th>Roll No</th>
-                            <th>Subjects</th>
-                            <th>Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for result in results %}
-                        <tr>
-                            <td>{{ result.name }}</td>
-                            <td>{{ result.class }}</td>
-                            <td>{{ result.roll_number }}</td>
-                            <td>{{ result.subjects|length }}</td>
-                            <td>{{ result.date.split()[0] }}</td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="5" class="text-center">No results found</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+
+        <div class="divider"></div>
+
+        <!-- Subjects -->
+        <div class="section-title"><i class="bi bi-journal-text me-1"></i> Subjects & Marks</div>
+
+        <div id="subjectsContainer" class="d-flex flex-column gap-2">
+          <!-- First subject row -->
+          <div class="subject-pill">
+            <button type="button" class="btn btn-light btn-sm remove-subject" disabled title="First cannot be removed">
+              <i class="bi bi-x-lg"></i>
+            </button>
+            <div class="row g-2">
+              <div class="col-12">
+                <label class="form-label mb-1 small">Subject</label>
+                <input type="text" name="subject_name_0" class="form-control" placeholder="e.g. Mathematics" required>
+              </div>
+              <div class="col-6">
+                <label class="form-label mb-1 small">Marks Obtained</label>
+                <input type="number" name="marks_obtained_0" class="form-control" placeholder="e.g. 78" required>
+              </div>
+              <div class="col-6">
+                <label class="form-label mb-1 small">Total Marks</label>
+                <input type="number" name="total_marks_0" class="form-control" placeholder="e.g. 100" required>
+              </div>
             </div>
+          </div>
         </div>
+
+        <!-- Floating Add Subject (also shown as normal button for desktops) -->
+        <button type="button" id="addSubject" class="btn btn-primary fab-add ripple d-md-none" aria-label="Add Subject">
+          <i class="bi bi-plus-lg fs-4"></i>
+        </button>
+
+        <div class="d-none d-md-block mt-2">
+          <button type="button" id="addSubjectDesktop" class="btn btn-outline-primary ripple">
+            <i class="bi bi-plus-circle"></i> Add Subject
+          </button>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Actions -->
+        <div class="sticky-action-bar">
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-success btn-lg ripple">
+              <i class="bi bi-save2 me-1"></i> Save Results
+            </button>
+          </div>
+        </div>
+      </form>
     </div>
+  </div>
+
+  <!-- ============ EXISTING RESULTS ============ -->
+  <div class="glass-card">
+    <div class="card-header card-header-info">
+      <h4 class="mb-0"><i class="bi bi-collection me-2"></i> Existing Results</h4>
+    </div>
+
+    <div class="card-body">
+      {% if results %}
+      <div class="accordion" id="resultsAccordion">
+        {% for result in results %}
+        {% set rid = 'res_' ~ loop.index %}
+        <div class="accordion-item mb-2">
+          <h2 class="accordion-header" id="h-{{ rid }}">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#c-{{ rid }}" aria-expanded="false" aria-controls="c-{{ rid }}">
+              <div class="d-flex flex-column">
+                <span class="fw-semibold">{{ result.name }} <span class="result-badge ms-2">Class {{ result.class }}</span></span>
+                <small class="text-muted">Roll {{ result.roll_number }} • {{ result.date.split()[0] }}</small>
+              </div>
+            </button>
+          </h2>
+          <div id="c-{{ rid }}" class="accordion-collapse collapse" aria-labelledby="h-{{ rid }}" data-bs-parent="#resultsAccordion">
+            <div class="accordion-body">
+              <ul class="list-group list-group-flush">
+                {% for sub in result.subjects %}
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>{{ sub.subject }}</span>
+                  <span class="fw-bold">{{ sub.marks_obtained }}/{{ sub.total_marks }}</span>
+                </li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="text-center py-4">
+        <i class="bi bi-clipboard-x fs-1 text-muted"></i>
+        <p class="mt-2 text-muted mb-0">No results found</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
 </div>
 
+<!-- Admin Bottom Menu (same style as other admin pages) -->
+<nav class="navbar navbar-expand fixed-bottom shadow-sm" id="bottomMenu">
+  <div class="container justify-content-around">
+    <a class="nav-link text-center" href="{{ url_for('admin_dashboard') }}">
+      <i class="bi bi-speedometer2"></i><br>Dashboard
+    </a>
+    <a class="nav-link text-center" href="{{ url_for('change_password') }}">
+      <i class="bi bi-key"></i><br>Password
+    </a>
+    <a class="nav-link text-center" href="{{ url_for('admin_logout') }}">
+      <i class="bi bi-box-arrow-right"></i><br>Logout
+    </a>
+  </div>
+</nav>
+
+<style>
+  .nav-link{
+    font-size: .8rem;
+    color: var(--bs-body-color);
+  }
+  #bottomMenu{
+    background-color: var(--bs-body-bg);
+    border-top: 1px solid var(--bs-border-color);
+  }
+  body.dark-mode #bottomMenu{
+    background-color: #1a1a1a;
+    border-top: 1px solid #333;
+  }
+  body.dark-mode .nav-link{
+    color:#eee;
+  }
+</style>
+
+<!-- ======== JS ======== -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    let subjectCount = 1;
-    
-    // Add subject row
-    document.getElementById('addSubject').addEventListener('click', function() {
-        const newRow = document.createElement('div');
-        newRow.className = 'subject-row row mb-2';
-        newRow.innerHTML = `
-            <div class="col-md-4">
-                <input type="text" name="subject_name_${subjectCount}" class="form-control" placeholder="Subject" required>
-            </div>
-            <div class="col-md-3">
-                <input type="number" name="marks_obtained_${subjectCount}" class="form-control" placeholder="Marks Obtained" required>
-            </div>
-            <div class="col-md-3">
-                <input type="number" name="total_marks_${subjectCount}" class="form-control" placeholder="Total Marks" required>
-            </div>
-            <div class="col-md-2">
-                <button type="button" class="btn btn-danger remove-subject">Remove</button>
-            </div>
-        `;
-        document.getElementById('subjectsContainer').appendChild(newRow);
-        subjectCount++;
-    });
-    
-    // Remove subject row
-    document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('remove-subject')) {
-            e.target.closest('.subject-row').remove();
-        }
-    });
+  let subjectCount = 1; // 0 is already present
+
+  const container = document.getElementById('subjectsContainer');
+  const addSubjectFab = document.getElementById('addSubject');
+  const addSubjectDesktop = document.getElementById('addSubjectDesktop');
+
+  function addSubject() {
+    const wrap = document.createElement('div');
+    wrap.className = 'subject-pill';
+    wrap.innerHTML = `
+      <button type="button" class="btn btn-danger btn-sm remove-subject" title="Remove">
+        <i class="bi bi-x-lg"></i>
+      </button>
+      <div class="row g-2">
+        <div class="col-12">
+          <label class="form-label mb-1 small">Subject</label>
+          <input type="text" name="subject_name_${subjectCount}" class="form-control" placeholder="e.g. Science" required>
+        </div>
+        <div class="col-6">
+          <label class="form-label mb-1 small">Marks Obtained</label>
+          <input type="number" name="marks_obtained_${subjectCount}" class="form-control" placeholder="e.g. 72" required>
+        </div>
+        <div class="col-6">
+          <label class="form-label mb-1 small">Total Marks</label>
+          <input type="number" name="total_marks_${subjectCount}" class="form-control" placeholder="e.g. 100" required>
+        </div>
+      </div>
+    `;
+    container.appendChild(wrap);
+    subjectCount++;
+  }
+
+  addSubjectFab.addEventListener('click', addSubject);
+  if(addSubjectDesktop){
+    addSubjectDesktop.addEventListener('click', addSubject);
+  }
+
+  // Remove subject row
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('.remove-subject')) {
+      const pill = e.target.closest('.subject-pill');
+      pill.remove();
+    }
+  });
+
+  // Ripple (buttons & cards with .ripple)
+  document.addEventListener('click', function(e){
+    const target = e.target.closest('.ripple');
+    if(!target) return;
+
+    const rect = target.getBoundingClientRect();
+    const ink = document.createElement('span');
+    ink.classList.add('ripple-ink');
+    ink.style.left = (e.clientX - rect.left) + 'px';
+    ink.style.top  = (e.clientY - rect.top)  + 'px';
+    ink.style.width = ink.style.height = Math.max(rect.width, rect.height) + 'px';
+    target.appendChild(ink);
+    setTimeout(()=> ink.remove(), 600);
+  }, false);
 });
 </script>
 {% endblock %}
