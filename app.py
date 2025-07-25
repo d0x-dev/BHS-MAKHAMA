@@ -520,38 +520,39 @@ def account():
 @app.route('/results', methods=['GET', 'POST'])
 @login_required
 def results():
+    # Load all results
+    try:
+        with open(RESULTS_FILE, 'r') as f:
+            results_data = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        results_data = []
+    
     if request.method == 'POST':
+        # Handle result viewing request
+        exam_id = request.form.get('exam_id')
         name = request.form.get('name')
-        class_name = request.form.get('class')
         roll_number = request.form.get('roll_number')
-
-        try:
-            with open(RESULTS_FILE, 'r') as f:
-                results_data = json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError):
-            results_data = []
-
-        # Support single result or a list of results
-        if isinstance(results_data, dict):
-            results_data = [results_data]
-
-        # Match student
-        student_results = [
-            r for r in results_data
-            if r.get('name', '').lower() == name.lower() and
-               r.get('class', '').lower() == class_name.lower() and
-               str(r.get('roll_number', '')).strip() == roll_number.strip()
-        ]
-
-        if student_results:
-            student = student_results[0]
-            return render_template('view_result.html',
-                                   student=student,
-                                   results=student.get('subjects', []))
-        else:
-            flash('No results found for the provided details', 'warning')
-
-    return render_template('get_results.html')
+        
+        if exam_id and name and roll_number:
+            try:
+                exam_id = int(exam_id)
+                exam = results_data[exam_id]
+                
+                # Find student in this exam
+                student = next((s for s in exam['students'] 
+                              if s['name'].lower() == name.lower() 
+                              and str(s['roll_number']) == str(roll_number)), None)
+                
+                if student:
+                    return render_template('view_result.html', 
+                                         exam=exam,
+                                         student=student)
+                else:
+                    flash('No results found for the provided details', 'warning')
+            except (IndexError, ValueError):
+                flash('Invalid exam selected', 'danger')
+    
+    return render_template('results.html', results=results_data)
 
 @app.route('/doc_request', methods=['GET', 'POST'])
 @login_required
@@ -593,30 +594,62 @@ def doc_request():
     
     return render_template('doc_request.html')
 
+
 @app.route('/admin/results', methods=['GET', 'POST'])
 @admin_required
 def admin_results():
     if request.method == 'POST':
-        # Handle form submission for adding results
-        name = request.form.get('name')
+        # Handle form submission
+        exam_name = request.form.get('exam_name')
+        exam_date = request.form.get('exam_date')
         class_name = request.form.get('class')
-        roll_number = request.form.get('roll_number')
         
-        # Get subjects data
-        subjects = []
+        # Get students data
+        students = []
         for key in request.form:
-            if key.startswith('subject_name_'):
+            if key.startswith('student_name_'):
                 index = key.split('_')[-1]
-                subject_name = request.form.get(f'subject_name_{index}')
-                marks_obtained = request.form.get(f'marks_obtained_{index}')
-                total_marks = request.form.get(f'total_marks_{index}')
+                student_name = request.form.get(f'student_name_{index}')
+                roll_number = request.form.get(f'roll_number_{index}')
                 
-                if subject_name and marks_obtained and total_marks:
-                    subjects.append({
-                        'subject': subject_name,
-                        'marks_obtained': marks_obtained,
-                        'total_marks': total_marks
+                # Get subjects for this student
+                subjects = []
+                for sub_key in request.form:
+                    if sub_key.startswith(f'subject_name_{index}_'):
+                        sub_index = sub_key.split('_')[-1]
+                        subject_name = request.form.get(f'subject_name_{index}_{sub_index}')
+                        marks_obtained = request.form.get(f'marks_obtained_{index}_{sub_index}')
+                        total_marks = request.form.get(f'total_marks_{index}_{sub_index}')
+                        
+                        if subject_name and marks_obtained and total_marks:
+                            subjects.append({
+                                'subject': subject_name,
+                                'marks_obtained': int(marks_obtained),
+                                'total_marks': int(total_marks)
+                            })
+                
+                if student_name and roll_number and subjects:
+                    total_obtained = sum(sub['marks_obtained'] for sub in subjects)
+                    total_max = sum(sub['total_marks'] for sub in subjects)
+                    percentage = (total_obtained / total_max * 100) if total_max > 0 else 0
+                    
+                    students.append({
+                        'name': student_name,
+                        'roll_number': roll_number,
+                        'subjects': subjects,
+                        'total_obtained': total_obtained,
+                        'total_max': total_max,
+                        'percentage': round(percentage, 2)
                     })
+        
+        # Save the exam results
+        exam_result = {
+            'exam_name': exam_name,
+            'exam_date': exam_date,
+            'class': class_name,
+            'students': students,
+            'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        }
         
         # Load existing results
         try:
@@ -625,29 +658,8 @@ def admin_results():
         except (FileNotFoundError, json.JSONDecodeError):
             results_data = []
             
-        # Check if student already has results
-        existing_index = -1
-        for i, result in enumerate(results_data):
-            if (result['name'].lower() == name.lower() and 
-                result['class'].lower() == class_name.lower() and 
-                result['roll_number'] == roll_number):
-                existing_index = i
-                break
-                
-        # Update or add new result
-        new_result = {
-            'name': name,
-            'class': class_name,
-            'roll_number': roll_number,
-            'date': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            'subjects': subjects
-        }
+        results_data.append(exam_result)
         
-        if existing_index >= 0:
-            results_data[existing_index] = new_result
-        else:
-            results_data.append(new_result)
-            
         # Save back to file
         with open(RESULTS_FILE, 'w') as f:
             json.dump(results_data, f, indent=2)
