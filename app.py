@@ -517,26 +517,41 @@ def syllabus():
 def account():
     return render_template('account.html', username=session.get('username'))
 
-@app.route('/result', methods=['POST'])
-def result():
-    student_class = request.form['student_class']
-    roll_number = request.form['roll_number']
+@app.route('/results', methods=['GET', 'POST'])
+@login_required
+def results():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        class_name = request.form.get('class')
+        roll_number = request.form.get('roll_number')
 
-    try:
-        with open('student_results.json') as file:
-            data = json.load(file)
+        try:
+            with open(RESULTS_FILE, 'r') as f:
+                results_data = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            results_data = []
 
-        student = next(
-            (s for s in data if s['class'] == student_class and s['roll_number'] == roll_number),
-            None
-        )
+        # Support single result or a list of results
+        if isinstance(results_data, dict):
+            results_data = [results_data]
 
-        return render_template('view_result.html', student=student)
+        # Match student
+        student_results = [
+            r for r in results_data
+            if r.get('name', '').lower() == name.lower() and
+               r.get('class', '').lower() == class_name.lower() and
+               str(r.get('roll_number', '')).strip() == roll_number.strip()
+        ]
 
-    except FileNotFoundError:
-        return "student_results.json file not found", 500
-    except Exception as e:
-        return f"Error: {e}", 500
+        if student_results:
+            student = student_results[0]
+            return render_template('view_result.html',
+                                   student=student,
+                                   results=student.get('subjects', []))
+        else:
+            flash('No results found for the provided details', 'warning')
+
+    return render_template('get_results.html')
 
 @app.route('/doc_request', methods=['GET', 'POST'])
 @login_required
