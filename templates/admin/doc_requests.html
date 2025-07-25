@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2 class="my-4">Document Requests</h2>
+    
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Class</th>
+                            <th>Roll No</th>
+                            <th>Document</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for request in requests %}
+                        <tr>
+                            <td>{{ request.name }}</td>
+                            <td>{{ request.class }}</td>
+                            <td>{{ request.roll_number }}</td>
+                            <td>{{ request.doc_name }}</td>
+                            <td>{{ request.date.split()[0] }}</td>
+                            <td>
+                                {% if request.status == 'pending' %}
+                                <span class="badge bg-warning text-dark">Pending</span>
+                                {% else %}
+                                <span class="badge bg-success">Completed</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if request.status == 'pending' %}
+                                <a href="{{ url_for('send_doc', request_id=loop.index0) }}" class="btn btn-sm btn-primary">Send</a>
+                                {% else %}
+                                <span class="text-muted">Completed</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center">No document requests found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
