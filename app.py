@@ -517,37 +517,42 @@ def syllabus():
 def account():
     return render_template('account.html', username=session.get('username'))
 
-# Add these new routes after your existing routes
 @app.route('/results', methods=['GET', 'POST'])
 @login_required
 def results():
     if request.method == 'POST':
-        name = request.form.get('name')
-        class_name = request.form.get('class')
-        roll_number = request.form.get('roll_number')
-        
+        name = request.form.get('name', '').strip()
+        class_name = request.form.get('class', '').strip()
+        roll_number = request.form.get('roll_number', '').strip()
+
+        if not name or not class_name or not roll_number:
+            flash('All fields are required.', 'danger')
+            return render_template('get_results.html')
+
         # Load results data
         try:
             with open(RESULTS_FILE, 'r') as f:
                 results_data = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
             results_data = []
-            
+
         # Find matching results
         student_results = [
-            r for r in results_data 
-            if r['name'].lower() == name.lower() and 
-               r['class'].lower() == class_name.lower() and 
-               r['roll_number'] == roll_number
+            r for r in results_data
+            if r.get('name', '').strip().lower() == name.lower() and
+               r.get('class', '').strip().lower() == class_name.lower() and
+               r.get('roll_number', '').strip() == roll_number
         ]
-        
+
         if student_results:
-            return render_template('view_result.html', 
-                                results=student_results[0]['subjects'],
-                                student=student_results[0])
+            return render_template('view_result.html',
+                                   results=student_results[0].get('subjects', []),
+                                   student=student_results[0])
         else:
-            flash('No results found for the provided details', 'warning')
-    
+            flash('No results found for the provided details.', 'warning')
+            return render_template('get_results.html',
+                                   name=name, class_name=class_name, roll_number=roll_number)
+
     return render_template('get_results.html')
 
 @app.route('/doc_request', methods=['GET', 'POST'])
