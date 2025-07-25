@@ -1,10 +1,99 @@
 {% extends "base.html" %}
+{% set hide_header = True %}
+
+{% block title %}Create New Exam{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-  <div class="card shadow">
+<style>
+  :root {
+    --soft-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    --btn-green: #2ecc71;
+    --btn-green-hover: #27ae60;
+    --btn-secondary-hover: #d1d1d1;
+  }
+
+  .page-title {
+    font-weight: 700;
+    font-size: 1.5rem;
+    text-align: center;
+    margin-bottom: 1.2rem;
+    animation: fadeInDown 0.4s ease;
+  }
+
+  .card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: var(--soft-shadow);
+    overflow: hidden;
+    animation: fadeIn 0.4s ease;
+  }
+
+  .card-header {
+    font-weight: 600;
+    font-size: 1.1rem;
+    border: none;
+  }
+
+  .form-control {
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.95rem;
+  }
+
+  .btn-submit {
+    background: var(--btn-green);
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    font-weight: 600;
+    font-size: 1rem;
+    color: #fff;
+    transition: background 0.2s ease, transform 0.15s ease;
+    box-shadow: 0 3px 8px rgba(46, 204, 113, 0.25);
+  }
+  .btn-submit:hover { background: var(--btn-green-hover); }
+  .btn-submit:active { transform: scale(0.96); }
+
+  .btn-back {
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: background 0.2s ease, transform 0.15s ease;
+  }
+  .btn-back:hover {
+    background: var(--btn-secondary-hover);
+  }
+
+  #bottomMenu {
+    background-color: var(--bs-body-bg);
+    border-top: 1px solid var(--bs-border-color);
+  }
+  .nav-link {
+    font-size: 0.8rem;
+    color: var(--bs-body-color);
+  }
+  body.dark-mode #bottomMenu {
+    background-color: #1a1a1a;
+    border-top: 1px solid #333;
+  }
+  body.dark-mode .nav-link { color: #eee; }
+
+  @keyframes fadeInDown {
+    from {opacity: 0; transform: translateY(-10px);}
+    to {opacity: 1; transform: translateY(0);}
+  }
+  @keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+  }
+</style>
+
+<div class="container mt-3 mb-5">
+  <h2 class="page-title">Create New Exam</h2>
+
+  <div class="card">
     <div class="card-header bg-primary text-white">
-      <h4 class="mb-0">Create New Exam</h4>
+      <i class="bi bi-clipboard-plus"></i> Exam Details
     </div>
     <div class="card-body">
       <form method="POST">
@@ -25,10 +114,10 @@
         </div>
         
         <div class="d-grid gap-2">
-          <button type="submit" class="btn btn-success btn-lg">
+          <button type="submit" class="btn-submit">
             <i class="bi bi-save"></i> Create Exam
           </button>
-          <a href="{{ url_for('admin_results') }}" class="btn btn-outline-secondary">
+          <a href="{{ url_for('admin_results') }}" class="btn btn-outline-secondary btn-back">
             <i class="bi bi-arrow-left"></i> Back to Results
           </a>
         </div>
@@ -36,4 +125,19 @@
     </div>
   </div>
 </div>
+
+<!-- Bottom Menu -->
+<nav class="navbar navbar-expand fixed-bottom shadow-sm" id="bottomMenu">
+  <div class="container justify-content-around">
+    <a class="nav-link text-center" href="{{ url_for('admin_dashboard') }}">
+      <i class="bi bi-speedometer2"></i><br>Dashboard
+    </a>
+    <a class="nav-link text-center active" href="{{ url_for('admin_results') }}">
+      <i class="bi bi-clipboard-data"></i><br>Results
+    </a>
+    <a class="nav-link text-center" href="{{ url_for('admin_logout') }}">
+      <i class="bi bi-box-arrow-right"></i><br>Logout
+    </a>
+  </div>
+</nav>
 {% endblock %}
