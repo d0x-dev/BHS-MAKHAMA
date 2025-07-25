@@ -1,0 +1,39 @@
+{% extends "admin/base_admin.html" %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="card shadow">
+    <div class="card-header bg-primary text-white">
+      <h4 class="mb-0">Create New Exam</h4>
+    </div>
+    <div class="card-body">
+      <form method="POST">
+        <div class="mb-3">
+          <label class="form-label">Exam Name</label>
+          <input type="text" name="exam_name" class="form-control" required placeholder="e.g. Annual Exam 2023">
+        </div>
+        
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label">Exam Date</label>
+            <input type="date" name="exam_date" class="form-control" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Class</label>
+            <input type="text" name="class" class="form-control" required placeholder="e.g. 10th">
+          </div>
+        </div>
+        
+        <div class="d-grid gap-2">
+          <button type="submit" class="btn btn-success btn-lg">
+            <i class="bi bi-save"></i> Create Exam
+          </button>
+          <a href="{{ url_for('admin_results') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Results
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
