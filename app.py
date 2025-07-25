@@ -1,33 +1,17 @@
-import os
-from flask import Flask, jsonify, render_template, request, redirect, url_for, flash, session, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_from_directory
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
+import os
 import json
+from flask import jsonify
 from datetime import datetime, timedelta
 import sqlite3
 from functools import wraps
 import secrets
 
-# Google Drive API imports
-from google_auth_oauthlib.flow import Flow
-from googleapiclient.discovery import build
-from googleapiclient.http import MediaFileUpload
-from google.oauth2.credentials import Credentials
-from google.auth.transport.requests import Request
-import google.auth.transport.requests
-
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
 app.secret_key = app.config['SECRET_KEY']
-
-# Enable insecure transport for local development (remove in production)
-os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
-
-# Google Drive API configuration
-CLIENT_SECRETS_FILE = 'credentials.json'
-SCOPES = ['https://www.googleapis.com/auth/drive.file']
-API_SERVICE_NAME = 'drive'
-API_VERSION = 'v3'
 
 # Session configuration - keeps users logged in until they logout
 app.config.update(
@@ -69,139 +53,123 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
-from werkzeug.security import generate_password_hash
-from datetime import datetime
-
 def init_db():
     with app.app_context():
-        try:
-            conn = get_db_connection()
-            c = conn.cursor()
-
-            # Create tables
-            c.execute('''
-                CREATE TABLE IF NOT EXISTS admin (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    username TEXT UNIQUE NOT NULL,
-                    password TEXT NOT NULL,
-                    last_login TEXT
-                )
-            ''')
-
-            c.execute('''
-                CREATE TABLE IF NOT EXISTS notifications (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    title TEXT NOT NULL,
-                    content TEXT NOT NULL,
-                    date_posted TEXT NOT NULL,
-                    is_pinned INTEGER DEFAULT 0
-                )
-            ''')
-
-            c.execute('''
-                CREATE TABLE IF NOT EXISTS documents (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT NOT NULL,
-                    category TEXT NOT NULL,
-                    filename TEXT NOT NULL,
-                    upload_date TEXT NOT NULL,
-                    drive_file_id TEXT
-                )
-            ''')
-
-            c.execute('''
-                CREATE TABLE IF NOT EXISTS syllabus (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    class_name TEXT NOT NULL,
-                    year TEXT NOT NULL,
-                    month TEXT NOT NULL,
-                    exam_name TEXT NOT NULL,
-                    subject TEXT NOT NULL,
-                    filename TEXT NOT NULL,
-                    upload_date TEXT NOT NULL,
-                    drive_file_id TEXT
-                )
-            ''')
-
-            c.execute('''
-                CREATE TABLE IF NOT EXISTS feedback (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT NOT NULL,
-                    email TEXT NOT NULL,
-                    subject TEXT NOT NULL,
-                    message TEXT NOT NULL,
-                    date TEXT NOT NULL,
-                    status TEXT DEFAULT 'pending',
-                    admin_notes TEXT
-                )
-            ''')
-
-            c.execute('''
-                CREATE TABLE IF NOT EXISTS classwork (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    class_name TEXT NOT NULL,
-                    subject TEXT NOT NULL,
-                    title TEXT NOT NULL,
-                    description TEXT,
-                    filename TEXT NOT NULL,
-                    upload_date TEXT NOT NULL,
-                    due_date TEXT,
-                    drive_file_id TEXT
-                )
-            ''')
-
-            c.execute('''
-                CREATE TABLE IF NOT EXISTS homework (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    class_name TEXT NOT NULL,
-                    subject TEXT NOT NULL,
-                    title TEXT NOT NULL,
-                    description TEXT,
-                    filename TEXT NOT NULL,
-                    upload_date TEXT NOT NULL,
-                    due_date TEXT,
-                    drive_file_id TEXT
-                )
-            ''')
-
-            c.execute('''
-                CREATE TABLE IF NOT EXISTS books (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    title TEXT NOT NULL,
-                    author TEXT,
-                    subject TEXT,
-                    class_name TEXT,
-                    filename TEXT NOT NULL,
-                    upload_date TEXT NOT NULL,
-                    drive_file_id TEXT
-                )
-            ''')
-
-            c.execute('''
-                CREATE TABLE IF NOT EXISTS user_sessions (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    username TEXT NOT NULL,
-                    session_token TEXT NOT NULL,
-                    ip_address TEXT NOT NULL,
-                    login_time TEXT NOT NULL,
-                    user_agent TEXT,
-                    FOREIGN KEY (username) REFERENCES admin(username)
-                )
-            ''')
-
-            # Insert default admin if not exists
-            existing_admin = c.execute('SELECT * FROM admin WHERE username = ?', ('admin',)).fetchone()
-            if not existing_admin:
-                c.execute(
-                    'INSERT INTO admin (username, password, last_login) VALUES (?, ?, ?)',
-                    ('admin', generate_password_hash('admin123'), datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-                )
-
+        conn = get_db_connection()
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS admin (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL,
+                last_login TEXT
+            )
+        ''')
+        
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS user_sessions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT NOT NULL,
+                session_token TEXT NOT NULL,
+                ip_address TEXT NOT NULL,
+                login_time TEXT NOT NULL,
+                user_agent TEXT,
+                FOREIGN KEY (username) REFERENCES users(username)
+            )
+        ''')
+        
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS notifications (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT NOT NULL,
+                content TEXT NOT NULL,
+                date_posted TEXT NOT NULL,
+                is_pinned INTEGER DEFAULT 0
+            )
+        ''')
+        
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS documents (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                category TEXT NOT NULL,
+                filename TEXT NOT NULL,
+                upload_date TEXT NOT NULL
+            )
+        ''')
+        
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS syllabus (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                class_name TEXT NOT NULL,
+                year TEXT NOT NULL,
+                month TEXT NOT NULL,
+                exam_name TEXT NOT NULL,
+                subject TEXT NOT NULL,
+                filename TEXT NOT NULL,
+                upload_date TEXT NOT NULL
+            )
+        ''')
+        
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS feedback (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                email TEXT NOT NULL,
+                subject TEXT NOT NULL,
+                message TEXT NOT NULL,
+                date TEXT NOT NULL,
+                status TEXT DEFAULT 'pending',
+                admin_notes TEXT
+            )
+        ''')
+        
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS classwork (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                class_name TEXT NOT NULL,
+                subject TEXT NOT NULL,
+                title TEXT NOT NULL,
+                description TEXT,
+                filename TEXT NOT NULL,
+                upload_date TEXT NOT NULL,
+                due_date TEXT
+            )
+        ''')
+        
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS homework (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                class_name TEXT NOT NULL,
+                subject TEXT NOT NULL,
+                title TEXT NOT NULL,
+                description TEXT,
+                filename TEXT NOT NULL,
+                upload_date TEXT NOT NULL,
+                due_date TEXT
+            )
+        ''')
+        
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS books (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT NOT NULL,
+                author TEXT,
+                subject TEXT,
+                class_name TEXT,
+                filename TEXT NOT NULL,
+                upload_date TEXT NOT NULL
+            )
+        ''')
+        
+        # Create default admin if not exists
+        admin = conn.execute('SELECT * FROM admin WHERE username = ?', ('admin',)).fetchone()
+        if not admin:
+            conn.execute(
+                'INSERT INTO admin (username, password) VALUES (?, ?)',
+                ('admin', generate_password_hash('admin123'))
+            )
             conn.commit()
-        except Exception as e:
-            print("Database initialization failed:", e)
-        finally:
-            conn.close()
+        conn.close()
 
 init_db()
 
@@ -209,70 +177,6 @@ def allowed_file(filename, allowed_extensions=None):
     if allowed_extensions is None:
         allowed_extensions = app.config['ALLOWED_EXTENSIONS']
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_extensions
-
-# Google Drive functions
-def get_drive_service():
-    if 'credentials' not in session:
-        return None
-    
-    credentials = Credentials(
-        token=session['credentials']['token'],
-        refresh_token=session['credentials']['refresh_token'],
-        token_uri=session['credentials']['token_uri'],
-        client_id=session['credentials']['client_id'],
-        client_secret=session['credentials']['client_secret'],
-        scopes=session['credentials']['scopes']
-    )
-    
-    if credentials.expired:
-        credentials.refresh(Request())
-        session['credentials'] = {
-            'token': credentials.token,
-            'refresh_token': credentials.refresh_token,
-            'token_uri': credentials.token_uri,
-            'client_id': credentials.client_id,
-            'client_secret': credentials.client_secret,
-            'scopes': credentials.scopes
-        }
-    
-    return build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
-
-def upload_to_drive(file_path, file_name, folder_id=None):
-    try:
-        drive_service = get_drive_service()
-        if not drive_service:
-            return None
-            
-        file_metadata = {
-            'name': file_name,
-            'mimeType': 'application/octet-stream'
-        }
-        
-        if folder_id:
-            file_metadata['parents'] = [folder_id]
-        
-        media = MediaFileUpload(file_path, resumable=True)
-        file = drive_service.files().create(
-            body=file_metadata,
-            media_body=media,
-            fields='id, webViewLink'
-        ).execute()
-        
-        return file
-    except Exception as e:
-        print(f"Error uploading to Google Drive: {e}")
-        return None
-
-def delete_from_drive(file_id):
-    try:
-        drive_service = get_drive_service()
-        if drive_service and file_id:
-            drive_service.files().delete(fileId=file_id).execute()
-            return True
-        return False
-    except Exception as e:
-        print(f"Error deleting file from Google Drive: {e}")
-        return False
 
 # Auth decorators
 def login_required(f):
@@ -397,56 +301,6 @@ def record_failed_attempt(username, ip_address):
         attempts_data[ip_address] = {'attempts': 1, 'timestamp': now}
     
     save_failed_attempts(attempts_data)
-
-# Google Drive authorization routes
-@app.route('/authorize')
-def authorize():
-    # Create flow instance to manage the OAuth 2.0 Authorization Grant Flow steps
-    flow = Flow.from_client_secrets_file(
-        CLIENT_SECRETS_FILE,
-        scopes=SCOPES,
-        redirect_uri=url_for('oauth2callback', _external=True)
-    )
-
-    # The URI created here must exactly match one of the authorized redirect URIs
-    # for the OAuth 2.0 client, which you configured in the API Console
-    authorization_url, state = flow.authorization_url(
-        access_type='offline',
-        include_granted_scopes='true')
-
-    # Store the state in the session so the callback can verify the auth server response
-    session['state'] = state
-
-    return redirect(authorization_url)
-
-@app.route('/oauth2callback')
-def oauth2callback():
-    # Specify the state when creating the flow in the callback so that it can
-    # verify the authorization server response
-    state = session['state']
-
-    flow = Flow.from_client_secrets_file(
-        CLIENT_SECRETS_FILE,
-        scopes=SCOPES,
-        state=state,
-        redirect_uri=url_for('oauth2callback', _external=True)
-    )
-
-    # Use the authorization server's response to fetch the OAuth 2.0 tokens
-    flow.fetch_token(authorization_response=request.url)
-
-    # Store the credentials in the session
-    credentials = flow.credentials
-    session['credentials'] = {
-        'token': credentials.token,
-        'refresh_token': credentials.refresh_token,
-        'token_uri': credentials.token_uri,
-        'client_id': credentials.client_id,
-        'client_secret': credentials.client_secret,
-        'scopes': credentials.scopes
-    }
-
-    return redirect(url_for('admin_dashboard'))
 
 # Routes
 @app.route('/')
@@ -670,45 +524,10 @@ def notifications():
     finally:
         conn.close()
 
-from flask import send_file
-import io
-
 @app.route('/download/<filename>')
 @login_required
 def download_file(filename):
-    local_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    
-    # Step 1: Serve from local disk if it exists
-    if os.path.exists(local_path):
-        return send_from_directory(app.config['UPLOAD_FOLDER'], filename, as_attachment=True)
-    
-    # Step 2: Check database for Google Drive file ID
-    conn = get_db_connection()
-    file_id = None
-    for table in ['documents', 'syllabus', 'classwork', 'homework', 'books']:
-        result = conn.execute(f'SELECT drive_file_id FROM {table} WHERE filename = ?', (filename,)).fetchone()
-        if result and result['drive_file_id']:
-            file_id = result['drive_file_id']
-            break
-
-    # Step 3: If found on Drive, download and serve
-    if file_id:
-        try:
-            drive_service = get_drive_service()
-            if drive_service:
-                request = drive_service.files().get_media(fileId=file_id)
-                fh = io.BytesIO()
-                downloader = MediaIoBaseDownload(fh, request)
-                done = False
-                while not done:
-                    status, done = downloader.next_chunk()
-                fh.seek(0)
-                return send_file(fh, as_attachment=True, download_name=filename)
-        except Exception as e:
-            print(f"[ERROR] Failed to download from Drive: {e}")
-    
-    flash('File not found.', 'danger')
-    return redirect(url_for('home'))
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename, as_attachment=True)
 
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
@@ -1026,24 +845,16 @@ def upload_classwork():
                 file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 file.save(file_path)
 
-                # Upload to Google Drive
-                drive_file = upload_to_drive(file_path, filename)
-                drive_file_id = drive_file['id'] if drive_file else None
-
                 conn = get_db_connection()
                 conn.execute(
                     '''INSERT INTO classwork 
-                    (class_name, subject, title, description, filename, upload_date, due_date, drive_file_id)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)''',
+                    (class_name, subject, title, description, filename, upload_date, due_date)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)''',
                     (class_name, subject, title, description, filename, 
-                     datetime.now().strftime('%Y-%m-%d %H:%M:%S'), due_date, drive_file_id)
+                     datetime.now().strftime('%Y-%m-%d %H:%M:%S'), due_date)
                 )
                 conn.commit()
                 conn.close()
-
-                # Remove local file after upload to Drive
-                if drive_file_id and os.path.exists(file_path):
-                    os.remove(file_path)
 
                 flash('Class work uploaded successfully!', 'success')
                 return redirect(url_for('upload_classwork'))  # Stay on same page after success
@@ -1078,24 +889,16 @@ def upload_homework():
                 file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 file.save(file_path)
 
-                # Upload to Google Drive
-                drive_file = upload_to_drive(file_path, filename)
-                drive_file_id = drive_file['id'] if drive_file else None
-
                 conn = get_db_connection()
                 conn.execute(
                     '''INSERT INTO homework 
-                    (class_name, subject, title, description, filename, upload_date, due_date, drive_file_id)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)''',
+                    (class_name, subject, title, description, filename, upload_date, due_date)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)''',
                     (class_name, subject, title, description, filename, 
-                     datetime.now().strftime('%Y-%m-%d %H:%M:%S'), due_date, drive_file_id)
+                     datetime.now().strftime('%Y-%m-%d %H:%M:%S'), due_date)
                 )
                 conn.commit()
                 conn.close()
-
-                # Remove local file after upload to Drive
-                if drive_file_id and os.path.exists(file_path):
-                    os.remove(file_path)
 
                 flash('Homework uploaded successfully!', 'success')
                 return redirect(url_for('upload_homework'))  # Stay on same page after success
@@ -1142,24 +945,16 @@ def upload_book():
                 file_path = os.path.join(upload_folder, filename)
                 file.save(file_path)
 
-                # Upload to Google Drive
-                drive_file = upload_to_drive(file_path, filename)
-                drive_file_id = drive_file['id'] if drive_file else None
-
                 conn = get_db_connection()
                 conn.execute(
                     '''INSERT INTO books 
-                    (title, author, subject, class_name, filename, upload_date, drive_file_id)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)''',
+                    (title, author, subject, class_name, filename, upload_date)
+                    VALUES (?, ?, ?, ?, ?, ?)''',
                     (title, author, subject, class_name, filename, 
-                     datetime.now().strftime('%Y-%m-%d %H:%M:%S'), drive_file_id)
+                     datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
                 )
                 conn.commit()
                 conn.close()
-
-                # Remove local file after upload to Drive
-                if drive_file_id and os.path.exists(file_path):
-                    os.remove(file_path)
 
                 flash('Book uploaded successfully!', 'success')
                 return redirect(url_for('upload_book'))  # Stay on same page after success
@@ -1342,15 +1137,11 @@ def upload_syllabus():
                 file_path = os.path.join(upload_folder, filename)
                 file.save(file_path)
                 
-                # Upload to Google Drive
-                drive_file = upload_to_drive(file_path, filename)
-                drive_file_id = drive_file['id'] if drive_file else None
-                
                 conn = get_db_connection()
                 conn.execute(
                     '''INSERT INTO syllabus 
-                    (class_name, year, month, exam_name, subject, filename, upload_date, drive_file_id) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)''',
+                    (class_name, year, month, exam_name, subject, filename, upload_date) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)''',
                     (
                         request.form['class_name'],
                         request.form['year'],
@@ -1358,16 +1149,11 @@ def upload_syllabus():
                         request.form['exam_name'],
                         request.form['subject'],
                         filename,
-                        datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                        drive_file_id
+                        datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     )
                 )
                 conn.commit()
                 conn.close()
-                
-                # Remove local file after upload to Drive
-                if drive_file_id and os.path.exists(file_path):
-                    os.remove(file_path)
                 
                 flash('Syllabus uploaded successfully!', 'success')
                 return redirect(url_for('upload_syllabus'))  # Stay on same page
@@ -1386,16 +1172,11 @@ def upload_syllabus():
 def delete_syllabus(id):
     try:
         conn = get_db_connection()
-        syllabus = conn.execute('SELECT filename, drive_file_id FROM syllabus WHERE id = ?', (id,)).fetchone()
+        syllabus = conn.execute('SELECT filename FROM syllabus WHERE id = ?', (id,)).fetchone()
         if not syllabus:
             flash('Syllabus not found', 'danger')
             return redirect(url_for('syllabus'))
         
-        # Delete from Google Drive if exists
-        if syllabus['drive_file_id']:
-            delete_from_drive(syllabus['drive_file_id'])
-        
-        # Delete local file if exists
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], syllabus['filename'])
         if os.path.exists(file_path):
             os.remove(file_path)
@@ -1438,21 +1219,13 @@ def upload_document():
                 file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 file.save(file_path)
                 
-                # Upload to Google Drive
-                drive_file = upload_to_drive(file_path, filename)
-                drive_file_id = drive_file['id'] if drive_file else None
-                
                 conn = get_db_connection()
                 conn.execute(
-                    'INSERT INTO documents (name, category, filename, upload_date, drive_file_id) VALUES (?, ?, ?, ?, ?)',
-                    (name, category, filename, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), drive_file_id)
+                    'INSERT INTO documents (name, category, filename, upload_date) VALUES (?, ?, ?, ?)',
+                    (name, category, filename, datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
                 )
                 conn.commit()
                 conn.close()
-                
-                # Remove local file after upload to Drive
-                if drive_file_id and os.path.exists(file_path):
-                    os.remove(file_path)
                 
                 flash('Document uploaded successfully', 'success')
                 return redirect(url_for('upload_document'))  # Stay on same page
@@ -1471,16 +1244,11 @@ def upload_document():
 def delete_document(id):
     try:
         conn = get_db_connection()
-        document = conn.execute('SELECT filename, drive_file_id FROM documents WHERE id = ?', (id,)).fetchone()
+        document = conn.execute('SELECT filename FROM documents WHERE id = ?', (id,)).fetchone()
         if not document:
             flash('Document not found', 'danger')
             return redirect(url_for('documents'))
         
-        # Delete from Google Drive if exists
-        if document['drive_file_id']:
-            delete_from_drive(document['drive_file_id'])
-        
-        # Delete local file if exists
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], document['filename'])
         if os.path.exists(file_path):
             os.remove(file_path)
@@ -1542,6 +1310,65 @@ def admin_logout():
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+def load_failed_attempts():
+    try:
+        with open(FAILED_ATTEMPTS_FILE, 'r') as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+def save_failed_attempts(data):
+    with open(FAILED_ATTEMPTS_FILE, 'w') as f:
+        json.dump(data, f)
+
+def is_blocked(username, ip_address):
+    attempts_data = load_failed_attempts()
+    now = datetime.now()
+    
+    # Check by username
+    if username in attempts_data:
+        last_attempt = datetime.fromisoformat(attempts_data[username]['timestamp'])
+        if attempts_data[username]['attempts'] >= MAX_LOGIN_ATTEMPTS:
+            if now - last_attempt < timedelta(hours=BLOCK_TIME_HOURS):
+                return True
+            else:
+                # Block period expired, reset attempts
+                attempts_data[username]['attempts'] = 0
+                save_failed_attempts(attempts_data)
+    
+    # Check by IP address
+    if ip_address in attempts_data:
+        last_attempt = datetime.fromisoformat(attempts_data[ip_address]['timestamp'])
+        if attempts_data[ip_address]['attempts'] >= MAX_LOGIN_ATTEMPTS:
+            if now - last_attempt < timedelta(hours=BLOCK_TIME_HOURS):
+                return True
+            else:
+                # Block period expired, reset attempts
+                attempts_data[ip_address]['attempts'] = 0
+                save_failed_attempts(attempts_data)
+    
+    return False
+
+def record_failed_attempt(username, ip_address):
+    attempts_data = load_failed_attempts()
+    now = datetime.now().isoformat()
+    
+    # Track by username
+    if username in attempts_data:
+        attempts_data[username]['attempts'] += 1
+        attempts_data[username]['timestamp'] = now
+    else:
+        attempts_data[username] = {'attempts': 1, 'timestamp': now}
+    
+    # Track by IP address
+    if ip_address in attempts_data:
+        attempts_data[ip_address]['attempts'] += 1
+        attempts_data[ip_address]['timestamp'] = now
+    else:
+        attempts_data[ip_address] = {'attempts': 1, 'timestamp': now}
+    
+    save_failed_attempts(attempts_data)
 
 @app.route('/check_username', methods=['POST'])
 def check_username():
