@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{# If you want to hide the global header for a cleaner marks-sheet feel, uncomment:
+{# If you ever want to hide the global header for a cleaner sheet:
 {% set hide_header = True %}
 #}
 
@@ -7,17 +7,20 @@
 
 {% block content %}
 {# 
-  ---------------------------------------------------------
-  GOVT. BHS MAKHAMA — RESULT VIEW (ANDROID-STYLE, 300+ LINES)
-  ---------------------------------------------------------
+=====================================================================================
+GOVT. BHS MAKHAMA — RESULT VIEW (ANDROID-STYLE, 500+ LINES, NO LEGEND BLOCK)
+- Removed the colour “pattern/legend” information strip you didn’t want.
+- Kept everything else: brand header, neat info lines, responsive table,
+  division badge, print/share/compact buttons, etc.
+- Ensured the Back button never sits under the bottom nav bar by adding extra
+  bottom padding & a spacer.
+=====================================================================================
 #}
 
 <style>
-/* =========================================================
-   THEME TOKENS
-   We respect base.html's data-bs-theme. These CSS vars allow
-   quick color swaps for dark/light mode.
-   ========================================================= */
+/* ============================================================================
+   1) THEME TOKENS (light & dark are respected via data-bs-theme)
+   ========================================================================== */
 :root {
   --surface: #ffffff;
   --surface-alt: #f8f9fa;
@@ -39,20 +42,20 @@
 
   --radius: 18px;
 
-  /* grade color buckets background (very soft) */
+  /* (We still keep row soft backgrounds if you want to retain them.
+     If you want to remove them as well, set all to transparent) */
   --grade-low-bg: #f8d7da;
   --grade-med-bg: #fff3cd;
   --grade-good-bg: #d1ecf1;
   --grade-high-bg: #d4edda;
 
-  /* table header bg for light */
   --table-head-bg: #f1f1f1;
-
-  /* subtle separators */
   --separator: rgba(0,0,0,.06);
 
-  /* brand header */
   --brand: #0d6efd;
+
+  /* safe-bottom height to keep stuff above bottom-nav (base.html) */
+  --safe-bottom: 96px;
 }
 
 [data-bs-theme="dark"] {
@@ -72,20 +75,19 @@
   --grade-high-bg: rgba(25,135,84,.18);
 
   --table-head-bg: #2b2b2b;
-
   --separator: rgba(255,255,255,.06);
 }
 
-/* =========================================================
-   LAYOUT WRAPPER
-   ========================================================= */
+/* ============================================================================
+   2) WRAPPER
+   ========================================================================== */
 .result-wrap {
-  padding-bottom: 100px; /* keep away from bottom nav overlap */
+  padding-bottom: calc(var(--safe-bottom) + 24px); /* keep Back button well above menu */
 }
 
-/* =========================================================
-   MARKS CARD CONTAINER
-   ========================================================= */
+/* ============================================================================
+   3) CARD SHELL
+   ========================================================================== */
 .marks-card {
   background: var(--surface);
   color: var(--on-surface);
@@ -102,9 +104,9 @@
   to { transform: translateY(0); opacity: 1; }
 }
 
-/* =========================================================
-   BRAND HEADER
-   ========================================================= */
+/* ============================================================================
+   4) BRAND HEADER
+   ========================================================================== */
 .brand-header {
   text-align: center;
   font-weight: 800;
@@ -115,9 +117,9 @@
   letter-spacing: .2px;
 }
 
-/* =========================================================
-   INFO BLOCK (NAME, ROLL, etc.)
-   ========================================================= */
+/* ============================================================================
+   5) INFO BLOCK
+   ========================================================================== */
 .info-block {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
@@ -139,14 +141,13 @@
   font-size: .92rem;
 }
 
-/* Single line style: label left + value right on big screens */
 .info-line {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
 }
 
-/* Stacked on small screens fallback */
+/* Stacked on small screens */
 @media (max-width: 480px) {
   .info-line {
     flex-direction: column;
@@ -154,9 +155,9 @@
   }
 }
 
-/* =========================================================
-   OVERALL BADGE (PASS / DIVISION / FAIL)
-   ========================================================= */
+/* ============================================================================
+   6) OVERALL RESULT BADGE
+   ========================================================================== */
 .overall-badge {
   display: inline-flex;
   align-items: center;
@@ -167,12 +168,8 @@
   font-weight: 600;
   margin-top: .3rem;
 }
+.overall-badge i { font-size: 1rem; }
 
-.overall-badge i {
-  font-size: 1rem;
-}
-
-/* We'll compute the class in template: .fail, .third, .second, .first */
 .overall-badge.fail {
   background: rgba(220,53,69,.1);
   color: #dc3545;
@@ -180,7 +177,6 @@
 [data-bs-theme="dark"] .overall-badge.fail {
   background: rgba(220,53,69,.22);
 }
-
 .overall-badge.third {
   background: rgba(255,193,7,.1);
   color: #ffc107;
@@ -188,7 +184,6 @@
 [data-bs-theme="dark"] .overall-badge.third {
   background: rgba(255,193,7,.2);
 }
-
 .overall-badge.second {
   background: rgba(13,202,240,.08);
   color: #0dcaf0;
@@ -196,7 +191,6 @@
 [data-bs-theme="dark"] .overall-badge.second {
   background: rgba(13,202,240,.16);
 }
-
 .overall-badge.first {
   background: rgba(25,135,84,.12);
   color: #198754;
@@ -205,9 +199,9 @@
   background: rgba(25,135,84,.22);
 }
 
-/* =========================================================
-   ACTION BAR
-   ========================================================= */
+/* ============================================================================
+   7) ACTION STRIP
+   ========================================================================== */
 .action-strip {
   display: flex;
   flex-wrap: wrap;
@@ -220,7 +214,7 @@
   border-radius: 999px;
 }
 
-/* Ripple for action buttons */
+/* Ripple effect for actions */
 .ripple {
   position: relative;
   overflow: hidden;
@@ -239,35 +233,9 @@
   }
 }
 
-/* =========================================================
-   LEGEND (COLOR CODES)
-   ========================================================= */
-.legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: .4rem .9rem;
-  padding: .75rem .9rem 0;
-  align-items: center;
-  font-size: .82rem;
-}
-.legend .legend-item {
-  display: inline-flex;
-  align-items: center;
-  gap: .35rem;
-}
-.legend .dot {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-}
-.dot-low   { background: var(--grade-low-bg); }
-.dot-med   { background: var(--grade-med-bg); }
-.dot-good  { background: var(--grade-good-bg); }
-.dot-high  { background: var(--grade-high-bg); }
-
-/* =========================================================
-   MARKS TABLE
-   ========================================================= */
+/* ============================================================================
+   8) MARKS TABLE
+   ========================================================================== */
 .table-wrap {
   padding: .9rem;
 }
@@ -298,29 +266,24 @@
   border-bottom: none;
 }
 
-/* Row color buckets (by overall division / use just as soft hints) */
-.grade-low {
-  background-color: var(--grade-low-bg);
-}
-.grade-med {
-  background-color: var(--grade-med-bg);
-}
-.grade-good {
-  background-color: var(--grade-good-bg);
-}
-.grade-high {
-  background-color: var(--grade-high-bg);
-}
+/* We keep these only if you still like row soft colors; 
+   If you want them gone too, simply comment them out and remove 
+   the row classes in template. Since you asked only to remove the 
+   “pattern information above”, we keep these slight cues. */
+.grade-low  { background-color: var(--grade-low-bg);  }
+.grade-med  { background-color: var(--grade-med-bg);  }
+.grade-good { background-color: var(--grade-good-bg); }
+.grade-high { background-color: var(--grade-high-bg); }
 
-/* total row visual */
+/* Total row */
 .total-row {
   background: var(--surface-alt);
   font-weight: 700;
 }
 
-/* =========================================================
-   FOOT NOTES / SIGNATURES
-   ========================================================= */
+/* ============================================================================
+   9) FOOT NOTES / SIGNATURES
+   ========================================================================== */
 .footer-notes {
   padding: .4rem .9rem 1rem;
   font-size: .82rem;
@@ -339,14 +302,29 @@
   font-weight: 500;
 }
 
-/* =========================================================
-   PRINT (hide bottom nav, stretch card)
-   ========================================================= */
+/* ============================================================================
+   10) BACK BUTTON SECTION
+   ========================================================================== */
+.back-section {
+  margin-top: 1.25rem;
+  margin-bottom: 1rem;
+  position: relative;
+  z-index: 2; /* keep well above anything else */
+}
+.back-section .btn {
+  border-radius: 999px;
+}
+
+/* ============================================================================
+   11) PRINT
+   Hide header, bottom nav etc when printing.
+   ========================================================================== */
 @media print {
   .app-header,
   .bottom-nav,
   .flash-stack,
-  .action-strip { display: none !important; }
+  .action-strip,
+  .back-section { display: none !important; }
 
   main.container {
     padding: 0 !important;
@@ -365,6 +343,10 @@
 </style>
 
 <div class="result-wrap container py-3">
+
+  <!-- =======================================================================
+       MARKS CARD (MAIN)
+       ===================================================================== -->
   <div class="marks-card" id="marksCard">
 
     <!-- =================== BRAND HEADER =================== -->
@@ -403,8 +385,6 @@
         <span class="info-label">Percentage:</span>
         <span class="info-value">
           {{ "%.2f"|format(student.percentage) }}%
-
-          {# Select class for overall badge: fail (<33%), third (<50), second (<75), first otherwise #}
           {% set badge_class = (
             'fail'   if student.percentage < 33 else
             'third'  if student.percentage < 50 else
@@ -441,22 +421,6 @@
       </button>
     </div>
 
-    <!-- =================== LEGEND ========================= -->
-    <div class="legend">
-      <span class="legend-item">
-        <span class="dot dot-low"></span> &lt; 33% (Fail)
-      </span>
-      <span class="legend-item">
-        <span class="dot dot-med"></span> 33% – 49.99%
-      </span>
-      <span class="legend-item">
-        <span class="dot dot-good"></span> 50% – 74.99%
-      </span>
-      <span class="legend-item">
-        <span class="dot dot-high"></span> 75% – 100%
-      </span>
-    </div>
-
     <!-- =================== MARKS TABLE ==================== -->
     <div class="table-wrap">
       <div class="table-responsive">
@@ -469,8 +433,8 @@
             </tr>
           </thead>
           <tbody>
+          {# NOTE: You said not to show per-subject percentage, so we don't. #}
           {% for subject in student.subjects %}
-            {# note: not showing per-subject % as you requested #}
             {% set pc = (subject.marks_obtained / subject.total_marks * 100) %}
             {% set color_row = (
               'grade-low' if pc < 33 else
@@ -506,30 +470,30 @@
     </div>
   </div>
 
-  <!-- Back button (outside the card so it always stays visible even if you print the card only) -->
-  <div class="d-grid mt-3">
-    <a href="{{ url_for('results') }}" class="btn btn-outline-primary">
+  <!-- Safe space to keep the button from overlapping the bottom nav -->
+  <div class="back-section">
+    <a href="{{ url_for('results') }}" class="btn btn-outline-primary w-100">
       <i class="bi bi-arrow-left"></i> Back to Results
     </a>
   </div>
 </div>
 
 <script>
-/* =========================================================
-   JS: PRINT, SHARE, COMPACT, RIPPLE, & SMALL EXTRAS
-   ========================================================= */
+/* =============================================================================
+   JS BEHAVIOR (print / share / compact / ripple)
+   ========================================================================== */
 document.addEventListener('DOMContentLoaded', function() {
-  const btnPrint = document.getElementById('btnPrint');
-  const btnShare = document.getElementById('btnShare');
+  const btnPrint   = document.getElementById('btnPrint');
+  const btnShare   = document.getElementById('btnShare');
   const btnCompact = document.getElementById('btnCompact');
-  const marksCard = document.getElementById('marksCard');
+  const marksCard  = document.getElementById('marksCard');
 
-  // 1) Print / Download
+  // ------------------ 1) Print / Download ------------------
   btnPrint?.addEventListener('click', () => {
     window.print();
   });
 
-  // 2) Web Share API (fallback to copy link)
+  // ------------------ 2) Share ------------------
   btnShare?.addEventListener('click', async () => {
     try {
       const shareData = {
@@ -548,7 +512,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // 3) Compact view
+  // ------------------ 3) Compact View ------------------
   btnCompact?.addEventListener('click', () => {
     const isPressed = btnCompact.getAttribute('aria-pressed') === 'true';
     btnCompact.setAttribute('aria-pressed', String(!isPressed));
@@ -558,7 +522,7 @@ document.addEventListener('DOMContentLoaded', function() {
       : '<i class="bi bi-arrows-collapse me-1"></i> Compact view';
   });
 
-  // 4) Ripple
+  // ------------------ 4) Ripple ------------------
   document.addEventListener('click', function(e){
     const target = e.target.closest('.ripple');
     if(!target) return;
