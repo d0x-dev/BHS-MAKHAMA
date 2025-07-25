@@ -1,29 +1,160 @@
 {% extends "base.html" %}
+{% set hide_header = True %}
+
+{% block title %}Manage Results - Admin{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">Manage Results</h2>
-    <a href="{{ url_for('add_result') }}" class="btn btn-primary">
-      <i class="bi bi-plus-circle"></i> Add New Result
+<style>
+  :root {
+    --soft-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    --btn-blue: #0d6efd;
+    --btn-blue-hover: #0b5ed7;
+    --btn-green: #2ecc71;
+    --btn-green-hover: #27ae60;
+  }
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.2rem;
+    animation: fadeInDown 0.4s ease;
+  }
+
+  .page-header h2 {
+    font-weight: 700;
+    font-size: 1.5rem;
+  }
+
+  .btn-add {
+    background: var(--btn-blue);
+    border: none;
+    border-radius: 8px;
+    padding: 0.4rem 0.9rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #fff;
+    box-shadow: 0 3px 8px rgba(13, 110, 253, 0.25);
+    transition: background 0.2s ease, transform 0.15s ease;
+  }
+  .btn-add:hover { background: var(--btn-blue-hover); }
+  .btn-add:active { transform: scale(0.96); }
+
+  .card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: var(--soft-shadow);
+    overflow: hidden;
+    animation: fadeIn 0.4s ease;
+  }
+
+  .card-header {
+    border: none;
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+
+  .table {
+    margin-bottom: 0;
+    border-collapse: separate;
+    border-spacing: 0 8px;
+  }
+  .table thead th {
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #6c757d;
+  }
+  .table tbody tr {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: var(--soft-shadow);
+    transition: transform 0.1s ease;
+  }
+  .table tbody tr:hover {
+    transform: translateY(-2px);
+  }
+  .table td {
+    vertical-align: middle;
+    padding: 0.75rem;
+    font-size: 0.92rem;
+  }
+
+  .btn-action {
+    background: var(--btn-green);
+    border: none;
+    border-radius: 6px;
+    padding: 0.35rem 0.6rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #fff;
+    transition: background 0.2s ease, transform 0.15s ease;
+  }
+  .btn-action:hover { background: var(--btn-green-hover); }
+  .btn-action:active { transform: scale(0.95); }
+
+  /* Empty state */
+  .empty-state {
+    padding: 2rem 1rem;
+  }
+  .empty-state i {
+    font-size: 3rem;
+    color: #adb5bd;
+  }
+  .empty-state h4 {
+    margin-top: 1rem;
+    font-size: 1.2rem;
+    color: #6c757d;
+  }
+
+  /* Bottom menu like dashboard */
+  #bottomMenu {
+    background-color: var(--bs-body-bg);
+    border-top: 1px solid var(--bs-border-color);
+  }
+  .nav-link {
+    font-size: 0.8rem;
+    color: var(--bs-body-color);
+  }
+  body.dark-mode #bottomMenu {
+    background-color: #1a1a1a;
+    border-top: 1px solid #333;
+  }
+  body.dark-mode .nav-link { color: #eee; }
+
+  @keyframes fadeInDown {
+    from {opacity: 0; transform: translateY(-10px);}
+    to {opacity: 1; transform: translateY(0);}
+  }
+  @keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+  }
+</style>
+
+<div class="container mt-3 mb-5">
+  <div class="page-header">
+    <h2>Manage Results</h2>
+    <a href="{{ url_for('add_result') }}" class="btn-add">
+      <i class="bi bi-plus-circle"></i> Add New
     </a>
   </div>
-  
+
   {% if results %}
-  <div class="card shadow">
+  <div class="card">
     <div class="card-header bg-info text-white">
-      <h5 class="mb-0">Available Exams</h5>
+      Available Exams
     </div>
-    <div class="card-body">
-      <div class="table-responsive">
-        <table class="table table-hover">
+    <div class="card-body p-0">
+      <div class="table-responsive p-2">
+        <table class="table align-middle">
           <thead>
             <tr>
               <th>Exam Name</th>
               <th>Class</th>
               <th>Date</th>
               <th>Students</th>
-              <th>Actions</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -34,7 +165,7 @@
               <td>{{ exam.exam_date }}</td>
               <td>{{ exam.students|length }}</td>
               <td>
-                <a href="{{ url_for('add_student', exam_id=exam.id) }}" class="btn btn-sm btn-success">
+                <a href="{{ url_for('add_student', exam_id=exam.id) }}" class="btn-action">
                   <i class="bi bi-person-plus"></i> Add Student
                 </a>
               </td>
@@ -46,13 +177,26 @@
     </div>
   </div>
   {% else %}
-  <div class="card shadow">
-    <div class="card-body text-center py-5">
-      <i class="bi bi-clipboard-x text-muted" style="font-size: 3rem;"></i>
-      <h4 class="mt-3 text-muted">No Exams Found</h4>
-      <p class="text-muted">Create your first exam by clicking the "Add New Result" button</p>
-    </div>
+  <div class="card empty-state text-center">
+    <i class="bi bi-clipboard-x"></i>
+    <h4>No Exams Found</h4>
+    <p class="text-muted">Create your first exam by clicking "Add New"</p>
   </div>
   {% endif %}
 </div>
+
+<!-- Bottom Menu -->
+<nav class="navbar navbar-expand fixed-bottom shadow-sm" id="bottomMenu">
+  <div class="container justify-content-around">
+    <a class="nav-link text-center" href="{{ url_for('admin_dashboard') }}">
+      <i class="bi bi-speedometer2"></i><br>Dashboard
+    </a>
+    <a class="nav-link text-center active" href="{{ url_for('manage_results') }}">
+      <i class="bi bi-clipboard-data"></i><br>Results
+    </a>
+    <a class="nav-link text-center" href="{{ url_for('admin_logout') }}">
+      <i class="bi bi-box-arrow-right"></i><br>Logout
+    </a>
+  </div>
+</nav>
 {% endblock %}
