@@ -1,0 +1,143 @@
+{% extends "admin/base_admin.html" %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="card shadow mb-4">
+    <div class="card-header bg-primary text-white">
+      <h4 class="mb-0">Add Student to {{ exam.exam_name }} (Class {{ exam.class }})</h4>
+    </div>
+    <div class="card-body">
+      <form method="POST">
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <label class="form-label">Student Name</label>
+            <input type="text" name="name" class="form-control" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Roll Number</label>
+            <input type="text" name="roll_number" class="form-control" required>
+          </div>
+        </div>
+        
+        <h5 class="mb-3">Subjects</h5>
+        <div id="subjectsContainer">
+          <div class="subject-pill card mb-3">
+            <div class="card-body">
+              <div class="row g-3">
+                <div class="col-md-5">
+                  <label class="form-label">Subject Name</label>
+                  <input type="text" name="subject_name_0" class="form-control" required>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Marks Obtained</label>
+                  <input type="number" name="marks_obtained_0" class="form-control" required>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Total Marks</label>
+                  <input type="number" name="total_marks_0" class="form-control" required>
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                  <button type="button" class="btn btn-danger remove-subject">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <button type="button" id="addSubject" class="btn btn-primary mb-4">
+          <i class="bi bi-plus-circle"></i> Add Subject
+        </button>
+        
+        <div class="d-grid gap-2">
+          <button type="submit" class="btn btn-success btn-lg">
+            <i class="bi bi-save"></i> Save Student
+          </button>
+          <a href="{{ url_for('admin_results') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Results
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  {% if exam.students %}
+  <div class="card shadow">
+    <div class="card-header bg-info text-white">
+      <h5 class="mb-0">Students in This Exam</h5>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Roll No</th>
+              <th>Name</th>
+              <th>Total Marks</th>
+              <th>Percentage</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for student in exam.students %}
+            <tr>
+              <td>{{ student.roll_number }}</td>
+              <td>{{ student.name }}</td>
+              <td>{{ student.total_obtained }}/{{ student.total_max }}</td>
+              <td>{{ "%.2f"|format(student.percentage) }}%</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  let subjectCount = 1;
+  const container = document.getElementById('subjectsContainer');
+  const addSubjectBtn = document.getElementById('addSubject');
+
+  function addSubject() {
+    const div = document.createElement('div');
+    div.className = 'subject-pill card mb-3';
+    div.innerHTML = `
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-5">
+            <label class="form-label">Subject Name</label>
+            <input type="text" name="subject_name_${subjectCount}" class="form-control" required>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Marks Obtained</label>
+            <input type="number" name="marks_obtained_${subjectCount}" class="form-control" required>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Total Marks</label>
+            <input type="number" name="total_marks_${subjectCount}" class="form-control" required>
+          </div>
+          <div class="col-md-1 d-flex align-items-end">
+            <button type="button" class="btn btn-danger remove-subject">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    container.appendChild(div);
+    subjectCount++;
+  }
+
+  addSubjectBtn.addEventListener('click', addSubject);
+
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('.remove-subject')) {
+      e.target.closest('.subject-pill').remove();
+    }
+  });
+});
+</script>
+{% endblock %}
