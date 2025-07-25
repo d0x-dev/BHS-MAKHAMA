@@ -264,7 +264,16 @@
     <div class="d-flex align-items-center">
       <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme"></button>
       {% if session.get('logged_in') %}
-      <!-- changed: just a link to /account -->
+      <!-- Notification icon -->
+      <a href="{{ url_for('my_docs') }}" class="ms-2 d-block text-white position-relative" aria-label="Notifications">
+        <i class="bi bi-bell-fill"></i>
+        {% if session.get('has_unread_docs') %}
+        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+          !
+        </span>
+        {% endif %}
+      </a>
+      <!-- Profile icon -->
       <a href="{{ url_for('account') }}" class="ms-2 d-block text-white" aria-label="Account">
         <img src="{{ url_for('static', filename='images/staff/default_staff.png') }}" alt="Profile" class="profile-img rounded-circle">
       </a>
