@@ -218,6 +218,20 @@
         <small class="text-muted">{{ books_count }} files</small>
       </a>
     </div>
+    <div class="col-6">
+      <a href="{{ url_for('admin_results') }}" class="card quick-card text-decoration-none text-reset p-3 ripple d-block">
+        <i class="bi bi-clipboard-data fs-2" style="color:#20c997;"></i>
+        <div class="fw-semibold">Results</div>
+        <small class="text-muted">Manage student results</small>
+      </a>
+    </div>
+    <div class="col-6">
+      <a href="{{ url_for('admin_doc_requests') }}" class="card quick-card text-decoration-none text-reset p-3 ripple d-block">
+        <i class="bi bi-file-earmark-arrow-down fs-2" style="color:#6f42c1;"></i>
+        <div class="fw-semibold">Doc Requests</div>
+        <small class="text-muted">View document requests</small>
+      </a>
+    </div>
   </div>
 
   <!-- Recent Feedbacks -->
