@@ -1,155 +1,68 @@
 {% extends "base.html" %}
-{% set hide_header = True %}
 
-{% block title %}Check Student Result{% endblock %}
+{% block title %}View Results{% endblock %}
 
 {% block content %}
-<style>
-  :root{
-    --card-radius: 18px;
-    --soft-shadow: 0 8px 20px rgba(0,0,0,.08);
-    --ripple-color: rgba(255,255,255,0.3);
-  }
-
-  .result-wrapper{
-    padding-bottom: 80px;
-  }
-
-  .page-title{
-    font-weight: 800;
-    text-align: center;
-    margin-bottom: 1rem;
-    animation: fadeInDown .6s ease;
-  }
-  @keyframes fadeInDown{
-    0%{opacity:0;transform:translateY(-20px);}
-    100%{opacity:1;transform:translateY(0);}
-  }
-
-  .glass-card{
-    border: none;
-    border-radius: var(--card-radius);
-    box-shadow: var(--soft-shadow);
-    padding: 1.5rem;
-    background: linear-gradient(135deg,#f9f9f9,#eaf1fb);
-    animation: popIn .4s ease forwards;
-    transform: translateY(10px);
-    opacity: 0;
-  }
-  @keyframes popIn{
-    to{transform: translateY(0); opacity:1;}
-  }
-
-  .form-label{
-    font-weight: 600;
-  }
-  .form-control{
-    border-radius: 12px;
-    min-height: 45px;
-    font-size: 1rem;
-  }
-
-  .btn-check-result{
-    width: 100%;
-    border-radius: 12px;
-    padding: 0.75rem;
-    font-size: 1.1rem;
-    background: linear-gradient(135deg,#0d6efd,#4dabf7);
-    border: none;
-    color: #fff;
-    box-shadow: 0 4px 10px rgba(13,110,253,.3);
-    transition: transform .15s ease;
-  }
-  .btn-check-result:active{
-    transform: scale(.98);
-  }
-
-  /* Ripple effect */
-  .ripple{
-    position: relative;
-    overflow: hidden;
-  }
-  .ripple span.ripple-ink{
-    position: absolute;
-    border-radius: 50%;
-    transform: scale(0);
-    animation: ripple .6s linear;
-    background-color: var(--ripple-color);
-  }
-  @keyframes ripple{
-    to{
-      transform: scale(4);
-      opacity: 0;
-    }
-  }
-
-  /* Alerts */
-  .alert{
-    border-radius: 12px;
-    animation: fadeIn .5s ease;
-  }
-  @keyframes fadeIn{
-    from{opacity:0; transform:translateY(-5px);}
-    to{opacity:1; transform:translateY(0);}
-  }
-
-  [data-bs-theme="dark"] .glass-card{
-    background: #1e1e1e;
-    box-shadow: 0 8px 20px rgba(0,0,0,.25);
-  }
-  [data-bs-theme="dark"] .btn-check-result{
-    background: linear-gradient(135deg,#0d6efd,#2563eb);
-  }
-</style>
-
-<div class="container result-wrapper mt-4">
-  <h2 class="page-title">Check Result</h2>
-
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, message in messages %}
-        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-          {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+<div class="container py-4">
+  <h2 class="text-center mb-4">Available Results</h2>
+  
+  <div class="card mb-4">
+    <div class="card-body">
+      <form method="POST" class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Search Results</label>
+          <input type="text" class="form-control" placeholder="Search by exam name or class">
         </div>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
-
-  <div class="glass-card">
-    <form method="POST">
-      <div class="mb-3">
-        <label for="name" class="form-label">Student Name</label>
-        <input type="text" class="form-control" id="name" name="name" placeholder="Enter your full name" required>
-      </div>
-      <div class="mb-3">
-        <label for="class" class="form-label">Class</label>
-        <input type="text" class="form-control" id="class" name="class" placeholder="Enter class (e.g., 10th)" required>
-      </div>
-      <div class="mb-3">
-        <label for="roll_number" class="form-label">Roll Number</label>
-        <input type="text" class="form-control" id="roll_number" name="roll_number" placeholder="Enter your roll number" required>
-      </div>
-      <button type="submit" class="btn-check-result ripple">
-        <i class="bi bi-search"></i> Check Result
-      </button>
-    </form>
+        <div class="col-md-3">
+          <label class="form-label">Class</label>
+          <select class="form-select">
+            <option value="">All Classes</option>
+            {% set classes = results|map(attribute='class')|unique %}
+            {% for class in classes %}
+            <option>{{ class }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+          <button type="button" class="btn btn-primary w-100">Search</button>
+        </div>
+      </form>
+    </div>
   </div>
+  
+  {% if results %}
+  <div class="list-group">
+    {% for exam in results %}
+    <div class="list-group-item">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="mb-0">{{ exam.exam_name }}</h5>
+        <span class="badge bg-primary">Class {{ exam.class }}</span>
+      </div>
+      <div class="text-muted mb-2">
+        <i class="bi bi-calendar me-1"></i> {{ exam.exam_date }}
+      </div>
+      
+      <form method="POST" class="mt-3">
+        <input type="hidden" name="exam_id" value="{{ loop.index0 }}">
+        <div class="row g-2">
+          <div class="col-md-4">
+            <input type="text" name="name" class="form-control" placeholder="Your Name" required>
+          </div>
+          <div class="col-md-4">
+            <input type="text" name="roll_number" class="form-control" placeholder="Roll Number" required>
+          </div>
+          <div class="col-md-4">
+            <button type="submit" class="btn btn-success w-100">
+              <i class="bi bi-search"></i> View Result
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="alert alert-info">No results available yet</div>
+  {% endif %}
 </div>
-
-<script>
-  // Ripple effect
-  document.addEventListener('click', function(e){
-    const target = e.target.closest('.ripple');
-    if(!target) return;
-    const rect = target.getBoundingClientRect();
-    const ink = document.createElement('span');
-    ink.classList.add('ripple-ink');
-    ink.style.left = (e.clientX - rect.left) + 'px';
-    ink.style.top  = (e.clientY - rect.top)  + 'px';
-    ink.style.width = ink.style.height = Math.max(rect.width, rect.height) + 'px';
-    target.appendChild(ink);
-    setTimeout(()=> ink.remove(), 600);
-  }, false);
-</script>
 {% endblock %}
