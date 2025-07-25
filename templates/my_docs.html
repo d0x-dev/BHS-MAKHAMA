@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2 class="my-4">My Received Documents</h2>
+    
+    {% if docs %}
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Document</th>
+                            <th>Admin</th>
+                            <th>Date Sent</th>
+                            <th>Notes</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for doc in docs %}
+                        <tr>
+                            <td>{{ doc.doc_name }}</td>
+                            <td>{{ doc.admin_name }}</td>
+                            <td>{{ doc.date.split()[0] }}</td>
+                            <td>{{ doc.notes or '-' }}</td>
+                            <td>
+                                <a href="{{ url_for('download_file', filename=doc.filename) }}" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-download"></i> Download
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        You haven't received any documents yet.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
