@@ -3,66 +3,48 @@
 {% block title %}View Result{% endblock %}
 
 {% block content %}
-<style>
-  .result-card {
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    overflow: hidden;
-  }
-  .result-header {
-    background: linear-gradient(135deg, #0d6efd 0%, #4e87ff 100%);
-    color: white;
-    padding: 15px;
-  }
-  .subject-row {
-    display: flex;
-    border-bottom: 1px solid #eee;
-    padding: 10px 0;
-  }
-  .subject-row:last-child {
-    border-bottom: none;
-  }
-  .total-row {
-    background: #f8f9fa;
-    font-weight: bold;
-  }
-</style>
-
 <div class="container py-4">
-  <div class="result-card">
-    <div class="result-header">
-      <h4>{{ exam.exam_name }} - Class {{ exam.class }}</h4>
-      <div class="d-flex justify-content-between">
-        <div>Date: {{ exam.exam_date }}</div>
-        <div>Roll No: {{ student.roll_number }}</div>
+  <div class="card shadow">
+    <div class="card-header bg-primary text-white">
+      <h4 class="mb-0">{{ exam.exam_name }} - Class {{ exam.class }}</h4>
+      <div class="d-flex justify-content-between mt-2">
+        <div><i class="bi bi-calendar me-1"></i> {{ exam.exam_date }}</div>
+        <div><i class="bi bi-person me-1"></i> {{ student.name }} (Roll: {{ student.roll_number }})</div>
       </div>
     </div>
     
-    <div class="p-4">
-      <h5 class="mb-4">Result for {{ student.name }}</h5>
-      
-      <div class="mb-4">
-        {% for subject in student.subjects %}
-        <div class="subject-row">
-          <div class="flex-grow-1">{{ subject.subject }}</div>
-          <div style="width: 100px; text-align: right;">{{ subject.marks_obtained }}</div>
-          <div style="width: 100px; text-align: right;">{{ subject.total_marks }}</div>
-          <div style="width: 100px; text-align: right;">
-            {{ "%.2f"|format((subject.marks_obtained / subject.total_marks * 100)) }}%
-          </div>
-        </div>
-        {% endfor %}
-        
-        <div class="subject-row total-row mt-3">
-          <div class="flex-grow-1">Total</div>
-          <div style="width: 100px; text-align: right;">{{ student.total_obtained }}</div>
-          <div style="width: 100px; text-align: right;">{{ student.total_max }}</div>
-          <div style="width: 100px; text-align: right;">{{ "%.2f"|format(student.percentage) }}%</div>
-        </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead class="table-light">
+            <tr>
+              <th>Subject</th>
+              <th class="text-end">Marks Obtained</th>
+              <th class="text-end">Total Marks</th>
+              <th class="text-end">Percentage</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for subject in student.subjects %}
+            <tr>
+              <td>{{ subject.subject }}</td>
+              <td class="text-end">{{ subject.marks_obtained }}</td>
+              <td class="text-end">{{ subject.total_marks }}</td>
+              <td class="text-end">{{ "%.2f"|format((subject.marks_obtained / subject.total_marks * 100)) }}%</td>
+            </tr>
+            {% endfor %}
+            <tr class="table-active fw-bold">
+              <td>Total</td>
+              <td class="text-end">{{ student.total_obtained }}</td>
+              <td class="text-end">{{ student.total_max }}</td>
+              <td class="text-end">{{ "%.2f"|format(student.percentage) }}%</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
       
-      <div class="d-flex justify-content-center">
-        <a href="{{ url_for('results') }}" class="btn btn-primary">
+      <div class="d-grid gap-2 mt-4">
+        <a href="{{ url_for('results') }}" class="btn btn-outline-primary">
           <i class="bi bi-arrow-left"></i> Back to Results
         </a>
       </div>
