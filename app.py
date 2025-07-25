@@ -30,7 +30,7 @@ FAILED_ATTEMPTS_FILE = 'failed_attempts.json'
 USERS_FILE = 'users.json'
 PENDING_FILE = 'pending_users.json'
 DECLINED_FILE = 'declined_users.json'
-RESULTS_FILE = 'student_results.json'
+RESULTS_FILE = 'results.json'
 DOC_REQUESTS_FILE = 'doc_requests.json'
 SENT_DOCS_FILE = 'sent_docs.json'
 
