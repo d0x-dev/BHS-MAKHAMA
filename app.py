@@ -588,7 +588,7 @@ def doc_request():
         flash('Your document request has been submitted to admin', 'success')
         return redirect(url_for('home'))
     
-    return render_template('doc_request.html'))
+    return render_template('doc_request.html')
 
 @app.route('/admin/results', methods=['GET', 'POST'])
 @admin_required
