@@ -3,48 +3,134 @@
 {% block title %}View Result{% endblock %}
 
 {% block content %}
+<style>
+  :root {
+    --low-grade: #f8d7da;
+    --medium-grade: #fff3cd;
+    --good-grade: #d1ecf1;
+    --high-grade: #d4edda;
+  }
+
+  .marks-card {
+    border: 2px solid #007bff;
+    border-radius: 10px;
+    background: #fff;
+    overflow: hidden;
+  }
+
+  .marks-header {
+    background: linear-gradient(135deg, #007bff, #4facfe);
+    color: white;
+    padding: 1rem;
+    text-align: center;
+    font-weight: bold;
+    border-bottom: 2px solid #0056b3;
+  }
+
+  .marks-header h4 {
+    margin: 0;
+    font-size: 1.3rem;
+  }
+
+  .exam-info {
+    font-size: 0.9rem;
+    opacity: 0.9;
+  }
+
+  .table-marks {
+    width: 100%;
+    margin-top: 0;
+    border-collapse: collapse;
+  }
+
+  .table-marks th,
+  .table-marks td {
+    padding: 0.75rem;
+    text-align: center;
+    border: 1px solid #dee2e6;
+  }
+
+  .table-marks th {
+    background: #f1f1f1;
+    font-weight: 600;
+  }
+
+  .total-row {
+    font-weight: bold;
+    background: #e2e3e5;
+  }
+
+  /* Color-coded rows */
+  .grade-low {
+    background-color: var(--low-grade) !important;
+  }
+  .grade-medium {
+    background-color: var(--medium-grade) !important;
+  }
+  .grade-good {
+    background-color: var(--good-grade) !important;
+  }
+  .grade-high {
+    background-color: var(--high-grade) !important;
+  }
+
+  .btn-back {
+    margin-top: 1.2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 6px;
+  }
+</style>
+
 <div class="container py-4">
-  <div class="card shadow">
-    <div class="card-header bg-primary text-white">
-      <h4 class="mb-0">{{ exam.exam_name }} - Class {{ exam.class }}</h4>
-      <div class="d-flex justify-content-between mt-2">
-        <div><i class="bi bi-calendar me-1"></i> {{ exam.exam_date }}</div>
-        <div><i class="bi bi-person me-1"></i> {{ student.name }} (Roll: {{ student.roll_number }})</div>
+  <div class="marks-card shadow">
+    <div class="marks-header">
+      <h4>{{ exam.exam_name }} - Class {{ exam.class }}</h4>
+      <div class="exam-info mt-1">
+        <i class="bi bi-calendar me-1"></i> {{ exam.exam_date }} |
+        <i class="bi bi-person me-1"></i> {{ student.name }} (Roll: {{ student.roll_number }})
       </div>
     </div>
     
-    <div class="card-body">
+    <div class="p-3">
       <div class="table-responsive">
-        <table class="table table-hover">
-          <thead class="table-light">
+        <table class="table-marks">
+          <thead>
             <tr>
               <th>Subject</th>
-              <th class="text-end">Marks Obtained</th>
-              <th class="text-end">Total Marks</th>
-              <th class="text-end">Percentage</th>
+              <th>Marks Obtained</th>
+              <th>Total Marks</th>
+              <th>Percentage</th>
             </tr>
           </thead>
           <tbody>
             {% for subject in student.subjects %}
-            <tr>
+            {% set percentage = (subject.marks_obtained / subject.total_marks * 100) %}
+            <tr class="
+              {% if percentage < 33 %}grade-low
+              {% elif percentage < 50 %}grade-medium
+              {% elif percentage < 75 %}grade-good
+              {% else %}grade-high
+              {% endif %}
+            ">
               <td>{{ subject.subject }}</td>
-              <td class="text-end">{{ subject.marks_obtained }}</td>
-              <td class="text-end">{{ subject.total_marks }}</td>
-              <td class="text-end">{{ "%.2f"|format((subject.marks_obtained / subject.total_marks * 100)) }}%</td>
+              <td>{{ subject.marks_obtained }}</td>
+              <td>{{ subject.total_marks }}</td>
+              <td>{{ "%.2f"|format(percentage) }}%</td>
             </tr>
             {% endfor %}
-            <tr class="table-active fw-bold">
+            <tr class="total-row">
               <td>Total</td>
-              <td class="text-end">{{ student.total_obtained }}</td>
-              <td class="text-end">{{ student.total_max }}</td>
-              <td class="text-end">{{ "%.2f"|format(student.percentage) }}%</td>
+              <td>{{ student.total_obtained }}</td>
+              <td>{{ student.total_max }}</td>
+              <td>{{ "%.2f"|format(student.percentage) }}%</td>
             </tr>
           </tbody>
         </table>
       </div>
       
-      <div class="d-grid gap-2 mt-4">
-        <a href="{{ url_for('results') }}" class="btn btn-outline-primary">
+      <div class="d-grid">
+        <a href="{{ url_for('results') }}" class="btn btn-outline-primary btn-back">
           <i class="bi bi-arrow-left"></i> Back to Results
         </a>
       </div>
