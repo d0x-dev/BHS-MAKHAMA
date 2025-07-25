@@ -25,7 +25,7 @@
                             <td>{{ subject.total_marks }}</td>
                             <td>
                                 {% if subject.total_marks > 0 %}
-                                    {{ "%.2f"|format((subject.marks_obtained|float / subject.total_marks|float) * 100 }}%
+                                    {{ "%.2f"|format((subject.marks_obtained | float) / (subject.total_marks | float) * 100) }}%
                                 {% else %}
                                     0%
                                 {% endif %}
