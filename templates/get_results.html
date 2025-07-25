@@ -1,26 +1,30 @@
 {% extends "base.html" %}
 
+{% block title %}Check Result{% endblock %}
+
 {% block content %}
-<div class="container">
-    <div class="card mt-4">
-        <div class="card-header bg-primary text-white">
-            <h4>Get Your Results</h4>
+<div class="container mt-5 mb-4">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-success text-white text-center">
+            <h4 class="mb-0">Enter Student Details</h4>
         </div>
         <div class="card-body">
             <form method="POST" action="{{ url_for('results') }}">
                 <div class="mb-3">
                     <label for="name" class="form-label">Full Name</label>
-                    <input type="text" class="form-control" id="name" name="name" required>
+                    <input type="text" class="form-control" name="name" required>
                 </div>
                 <div class="mb-3">
                     <label for="class" class="form-label">Class</label>
-                    <input type="text" class="form-control" id="class" name="class" required>
+                    <input type="text" class="form-control" name="class" required>
                 </div>
                 <div class="mb-3">
                     <label for="roll_number" class="form-label">Roll Number</label>
-                    <input type="text" class="form-control" id="roll_number" name="roll_number" required>
+                    <input type="text" class="form-control" name="roll_number" required>
                 </div>
-                <button type="submit" class="btn btn-primary">Get Results</button>
+                <div class="text-center">
+                    <button type="submit" class="btn btn-success">View Result</button>
+                </div>
             </form>
         </div>
     </div>
