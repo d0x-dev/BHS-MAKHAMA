@@ -63,12 +63,7 @@
       box-shadow: var(--shadow-strong);
     }
 
-    /* ===== SCORE X animated logo ===== */
-    .app-title{
-      display: inline-flex;
-      align-items: center;
-      height: 100%;
-    }
+    /* SCORE X animated logo */
     .scorex-logo{
       display: inline-flex;
       align-items: center;
@@ -77,24 +72,16 @@
       font-size: 1.25rem;
       letter-spacing: .12rem;
       line-height: 1;
-      background: linear-gradient(90deg,#ffffff,#e6f2ff,#ffffff);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      filter: drop-shadow(0 1px 1px rgba(0,0,0,.12));
-      animation: shimmer 3s linear infinite;
+      color: #fff;
       opacity: 0;
+      position: relative;
     }
-    .scorex-logo.animate{
-      animation: shimmer 3s linear infinite, popIn .55s cubic-bezier(.2,.8,.2,1) forwards;
+    .scorex-logo.animate {
+      opacity: 1;
+      animation: popIn .55s cubic-bezier(.2,.8,.2,1) forwards;
     }
-    .scorex-logo span{
-      display: inline-block;
-      transform-origin: bottom;
-      opacity: 0;
-    }
-    /* staggered per-letter entrance */
     .scorex-logo.animate span{
+      display: inline-block;
       animation: letterIn .55s cubic-bezier(.2,.8,.2,1) forwards;
     }
     .scorex-logo.animate span:nth-child(1){ animation-delay:.05s; }
@@ -112,9 +99,22 @@
       0%{ opacity:0; transform: translateY(4px) scale(.98); }
       100%{ opacity:1; transform: translateY(0) scale(1); }
     }
-    @keyframes shimmer{
-      0%{ background-position: -200% 0; }
-      100%{ background-position: 200% 0; }
+
+    /* Shine effect */
+    .scorex-logo.animate::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -50%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(120deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.1) 100%);
+      transform: skewX(-25deg);
+      animation: shine 1.5s ease-in-out 0.8s forwards;
+    }
+    @keyframes shine {
+      0% { left: -50%; }
+      100% { left: 120%; }
     }
 
     .theme-toggle{
@@ -149,7 +149,7 @@
       transition: padding var(--anim-fast);
     }
 
-    /* Fix white components in dark */
+    /* Dark mode fixes */
     [data-bs-theme="dark"] body{
       background-color:#121212 !important;
       color:#f1f1f1 !important;
@@ -273,62 +273,20 @@
 </head>
 <body class="d-flex flex-column min-vh-100">
 
-  <!-- Icons Templates (inline, colorful) -->
-  <template id="sunIcon">
-    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24">
-      <defs>
-        <linearGradient id="sunGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#ffda6a"/>
-          <stop offset="100%" stop-color="#ff9f1c"/>
-        </linearGradient>
-      </defs>
-      <circle cx="12" cy="12" r="5.5" fill="url(#sunGrad)"/>
-      <g stroke="url(#sunGrad)" stroke-width="2" stroke-linecap="round">
-        <line x1="12" y1="2" x2="12" y2="4"/>
-        <line x1="12" y1="20" x2="12" y2="22"/>
-        <line x1="2" y1="12" x2="4" y2="12"/>
-        <line x1="20" y1="12" x2="22" y2="12"/>
-        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-      </g>
-    </svg>
-  </template>
-
-  <template id="moonIcon">
-    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24">
-      <defs>
-        <linearGradient id="moonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#6c63ff"/>
-          <stop offset="100%" stop-color="#3f37c9"/>
-        </linearGradient>
-      </defs>
-      <path d="M21 12.79A9 9 0 0 1 11.21 3 7.2 7.2 0 1 0 21 12.79z" fill="url(#moonGrad)"/>
-    </svg>
-  </template>
-
   <!-- Top App Bar -->
   <div class="app-header">
-    <span class="app-title" aria-label="SCORE X">
-      <!-- Animated SCORE X -->
-      <span id="scorexLogo" class="scorex-logo">
-        <span>S</span><span>C</span><span>O</span><span>R</span><span>E</span><span>X</span>
-      </span>
+    <span class="scorex-logo" id="scorexLogo">
+      <span>S</span><span>C</span><span>O</span><span>R</span><span>E</span><span>X</span>
     </span>
     <div class="d-flex align-items-center">
       <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme"></button>
       {% if session.get('logged_in') %}
-      <!-- Notification icon -->
       <a href="{{ url_for('my_docs') }}" class="ms-2 d-block text-white position-relative" aria-label="Notifications">
         <i class="bi bi-bell-fill"></i>
         {% if session.get('has_unread_docs') %}
-        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-          !
-        </span>
+        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">!</span>
         {% endif %}
       </a>
-      <!-- Profile icon -->
       <a href="{{ url_for('account') }}" class="ms-2 d-block text-white" aria-label="Account">
         <img src="{{ url_for('static', filename='images/staff/default_staff.png') }}" alt="Profile" class="profile-img rounded-circle">
       </a>
@@ -357,34 +315,20 @@
 
   <!-- Bottom Navigation -->
   <nav class="bottom-nav">
-    <a href="{{ url_for('home') }}"
-       class="bottom-link {% if request.endpoint == 'home' %}active{% endif %}">
-      <i class="bi bi-house-door-fill"></i>
-      <span>Home</span>
+    <a href="{{ url_for('home') }}" class="bottom-link {% if request.endpoint == 'home' %}active{% endif %}">
+      <i class="bi bi-house-door-fill"></i><span>Home</span>
     </a>
-
-    <a href="{{ url_for('documents') }}"
-       class="bottom-link {% if request.endpoint == 'documents' %}active{% endif %}">
-      <i class="bi bi-file-earmark-text"></i>
-      <span>Docs</span>
+    <a href="{{ url_for('documents') }}" class="bottom-link {% if request.endpoint == 'documents' %}active{% endif %}">
+      <i class="bi bi-file-earmark-text"></i><span>Docs</span>
     </a>
-
-    <a href="{{ url_for('notifications') }}"
-       class="bottom-link {% if request.endpoint == 'notifications' %}active{% endif %}">
-      <i class="bi bi-bell-fill"></i>
-      <span>Alerts</span>
+    <a href="{{ url_for('notifications') }}" class="bottom-link {% if request.endpoint == 'notifications' %}active{% endif %}">
+      <i class="bi bi-bell-fill"></i><span>Alerts</span>
     </a>
-
-    <a href="{{ url_for('syllabus') }}"
-       class="bottom-link {% if request.endpoint == 'syllabus' %}active{% endif %}">
-      <i class="bi bi-journal-bookmark-fill"></i>
-      <span>Syllabus</span>
+    <a href="{{ url_for('syllabus') }}" class="bottom-link {% if request.endpoint == 'syllabus' %}active{% endif %}">
+      <i class="bi bi-journal-bookmark-fill"></i><span>Syllabus</span>
     </a>
-
-    <a href="{{ url_for('about') }}"
-       class="bottom-link {% if request.endpoint == 'about' %}active{% endif %}">
-      <i class="bi bi-info-circle-fill"></i>
-      <span>About</span>
+    <a href="{{ url_for('about') }}" class="bottom-link {% if request.endpoint == 'about' %}active{% endif %}">
+      <i class="bi bi-info-circle-fill"></i><span>About</span>
     </a>
   </nav>
 
@@ -392,46 +336,22 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      // Kickoff the SCOREX logo animation
       const logo = document.getElementById('scorexLogo');
-      requestAnimationFrame(() => {
-        // next frame ensures layout is ready so transition plays
-        logo.classList.add('animate');
-      });
+      setTimeout(() => logo.classList.add('animate'), 100);
 
       const themeToggle = document.getElementById('themeToggle');
-      const sunT = document.getElementById('sunIcon');
-      const moonT = document.getElementById('moonIcon');
       const html = document.documentElement;
-
-      const saved = localStorage.getItem('theme') ||
-        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-
-      function setIcon(mode){
-        themeToggle.innerHTML = '';
-        const tpl = mode === 'dark' ? sunT : moonT;
-        themeToggle.appendChild(tpl.content.cloneNode(true));
-      }
+      const saved = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 
       function applyTheme(mode){
         html.setAttribute('data-bs-theme', mode);
-        if(mode === 'dark'){
-          document.body.classList.add('dark-mode');
-        }else{
-          document.body.classList.remove('dark-mode');
-        }
-        setIcon(mode);
+        localStorage.setItem('theme', mode);
       }
-
       applyTheme(saved);
-
       themeToggle.addEventListener('click', () => {
-        const next = html.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
-        applyTheme(next);
-        localStorage.setItem('theme', next);
+        applyTheme(html.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark');
       });
 
-      // Auto close flash after 4s
       setTimeout(() => {
         document.querySelectorAll('.flash-stack .alert').forEach(a=>{
           try{ bootstrap.Alert.getOrCreateInstance(a).close(); }catch(e){}
