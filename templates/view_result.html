@@ -1,397 +1,303 @@
 {% extends "base.html" %}
-{# If you ever want to hide the global header for a cleaner sheet:
-{% set hide_header = True %}
-#}
 
 {% block title %}View Result – {{ student.name }}{% endblock %}
 
 {% block content %}
-{# 
-=====================================================================================
-GOVT. BHS MAKHAMA — RESULT VIEW (ANDROID-STYLE, 500+ LINES, NO LEGEND BLOCK)
-- Removed the colour “pattern/legend” information strip you didn’t want.
-- Kept everything else: brand header, neat info lines, responsive table,
-  division badge, print/share/compact buttons, etc.
-- Ensured the Back button never sits under the bottom nav bar by adding extra
-  bottom padding & a spacer.
-=====================================================================================
-#}
-
 <style>
-/* ============================================================================
-   1) THEME TOKENS (light & dark are respected via data-bs-theme)
-   ========================================================================== */
+/* Base variables and layout */
 :root {
   --surface: #ffffff;
   --surface-alt: #f8f9fa;
   --on-surface: #212529;
   --muted: #6c757d;
-
   --primary: #0d6efd;
-  --primary-soft: rgba(13,110,253,.12);
-
   --border: rgba(0,0,0,.1);
-
   --success: #198754;
   --warning: #ffc107;
   --danger: #dc3545;
   --info: #0dcaf0;
-
-  --soft-shadow: 0 6px 18px rgba(0,0,0,.08);
-  --soft-shadow-strong: 0 12px 28px rgba(0,0,0,.12);
-
-  --radius: 18px;
-
-  /* (We still keep row soft backgrounds if you want to retain them.
-     If you want to remove them as well, set all to transparent) */
-  --grade-low-bg: #f8d7da;
-  --grade-med-bg: #fff3cd;
-  --grade-good-bg: #d1ecf1;
-  --grade-high-bg: #d4edda;
-
-  --table-head-bg: #f1f1f1;
-  --separator: rgba(0,0,0,.06);
-
-  --brand: #0d6efd;
-
-  /* safe-bottom height to keep stuff above bottom-nav (base.html) */
+  --radius: 12px;
   --safe-bottom: 96px;
 }
 
-[data-bs-theme="dark"] {
-  --surface: #1e1e1e;
-  --surface-alt: #252525;
-  --on-surface: #f1f1f1;
-  --muted: #adb5bd;
-
-  --border: rgba(255,255,255,.08);
-
-  --soft-shadow: 0 6px 18px rgba(0,0,0,.28);
-  --soft-shadow-strong: 0 12px 28px rgba(0,0,0,.34);
-
-  --grade-low-bg: rgba(220,53,69,.18);
-  --grade-med-bg: rgba(255,193,7,.14);
-  --grade-good-bg: rgba(13,202,240,.14);
-  --grade-high-bg: rgba(25,135,84,.18);
-
-  --table-head-bg: #2b2b2b;
-  --separator: rgba(255,255,255,.06);
-}
-
-/* ============================================================================
-   2) WRAPPER
-   ========================================================================== */
 .result-wrap {
-  padding-bottom: calc(var(--safe-bottom) + 24px); /* keep Back button well above menu */
+  padding-bottom: calc(var(--safe-bottom) + 24px);
 }
 
-/* ============================================================================
-   3) CARD SHELL
-   ========================================================================== */
 .marks-card {
   background: var(--surface);
-  color: var(--on-surface);
   border-radius: var(--radius);
-  box-shadow: var(--soft-shadow);
-  border: 1px solid var(--border);
   overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,.08);
+  border: 1px solid var(--border);
   transform: translateY(8px);
   opacity: 0;
-  animation: popIn .5s cubic-bezier(.2,.8,.2,1) forwards .08s;
+  animation: popIn .4s ease-out forwards;
 }
 
 @keyframes popIn {
   to { transform: translateY(0); opacity: 1; }
 }
 
-/* ============================================================================
-   4) BRAND HEADER
-   ========================================================================== */
 .brand-header {
+  background: linear-gradient(135deg, #0d6efd 0%, #5b8cff 100%);
+  color: white;
+  padding: 1rem;
   text-align: center;
-  font-weight: 800;
-  font-size: 1.05rem;
-  background: linear-gradient(135deg, var(--primary) 0%, #5b8cff 100%);
-  color: #fff;
-  padding: .9rem .75rem;
-  letter-spacing: .2px;
+  font-weight: 700;
+  font-size: 1.1rem;
 }
 
-/* ============================================================================
-   5) INFO BLOCK
-   ========================================================================== */
-.info-block {
+.institute-details {
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-align: center;
+  padding: 0.25rem 1rem 0.5rem;
+  border-bottom: 1px dashed var(--border);
+}
+
+.info-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-  gap: .35rem .75rem;
-  padding: .9rem .9rem .7rem;
-  background: var(--surface);
-  border-bottom: 1px dashed var(--separator);
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.5rem 1rem;
+  padding: 1rem;
+  border-bottom: 1px dashed var(--border);
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
 }
 
 .info-label {
-  font-weight: 600;
+  font-size: 0.75rem;
   color: var(--muted);
-  font-size: .84rem;
+  margin-bottom: 0.15rem;
 }
 
 .info-value {
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 0.9rem;
   color: var(--on-surface);
-  font-size: .92rem;
 }
 
-.info-line {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-}
-
-/* Stacked on small screens */
-@media (max-width: 480px) {
-  .info-line {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
-
-/* ============================================================================
-   6) OVERALL RESULT BADGE
-   ========================================================================== */
-.overall-badge {
+.result-badge {
   display: inline-flex;
   align-items: center;
-  gap: .4rem;
-  padding: .25rem .6rem;
+  gap: 0.4rem;
+  padding: 0.2rem 0.6rem;
   border-radius: 999px;
-  font-size: .8rem;
   font-weight: 600;
-  margin-top: .3rem;
-}
-.overall-badge i { font-size: 1rem; }
-
-.overall-badge.fail {
-  background: rgba(220,53,69,.1);
-  color: #dc3545;
-}
-[data-bs-theme="dark"] .overall-badge.fail {
-  background: rgba(220,53,69,.22);
-}
-.overall-badge.third {
-  background: rgba(255,193,7,.1);
-  color: #ffc107;
-}
-[data-bs-theme="dark"] .overall-badge.third {
-  background: rgba(255,193,7,.2);
-}
-.overall-badge.second {
-  background: rgba(13,202,240,.08);
-  color: #0dcaf0;
-}
-[data-bs-theme="dark"] .overall-badge.second {
-  background: rgba(13,202,240,.16);
-}
-.overall-badge.first {
-  background: rgba(25,135,84,.12);
-  color: #198754;
-}
-[data-bs-theme="dark"] .overall-badge.first {
-  background: rgba(25,135,84,.22);
+  font-size: 0.8rem;
+  margin-left: .35rem;
 }
 
-/* ============================================================================
-   7) ACTION STRIP
-   ========================================================================== */
-.action-strip {
+.result-badge.fail { background: rgba(220,53,69,0.1); color: #dc3545; }
+.result-badge.third { background: rgba(255,193,7,0.1); color: #ffc107; }
+.result-badge.second { background: rgba(13,202,240,0.1); color: #0dcaf0; }
+.result-badge.first { background: rgba(25,135,84,0.1); color: #198754; }
+
+.action-bar {
   display: flex;
-  flex-wrap: wrap;
-  gap: .5rem;
-  padding: .75rem .9rem .5rem;
-  border-bottom: 1px dashed var(--separator);
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
   background: var(--surface-alt);
+  border-bottom: 1px dashed var(--border);
+  flex-wrap: wrap;
 }
-.action-strip .btn {
+
+.action-btn {
   border-radius: 999px;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
-/* Ripple effect for actions */
-.ripple {
-  position: relative;
-  overflow: hidden;
-}
-.ripple span.r-ink {
-  position: absolute;
-  border-radius: 50%;
-  transform: scale(0);
-  animation: ripple .6s linear;
-  background-color: rgba(255,255,255,.3);
-}
-@keyframes ripple {
-  to {
-    transform: scale(4);
-    opacity: 0;
-  }
-}
-
-/* ============================================================================
-   8) MARKS TABLE
-   ========================================================================== */
-.table-wrap {
-  padding: .9rem;
-}
-.table-marks {
+.marks-table {
   width: 100%;
   border-collapse: collapse;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: var(--soft-shadow);
-  background: var(--surface);
-}
-.table-marks thead th {
-  background: var(--table-head-bg);
-  color: var(--on-surface);
-  padding: .65rem .5rem;
-  text-align: center;
-  border-bottom: 1px solid var(--border);
-  font-size: .9rem;
-  font-weight: 600;
-}
-.table-marks tbody td {
-  text-align: center;
-  padding: .6rem .4rem;
-  border-bottom: 1px solid var(--border);
-}
-.table-marks tbody tr:last-child td {
-  border-bottom: none;
+  font-size: 0.9rem;
 }
 
-/* We keep these only if you still like row soft colors; 
-   If you want them gone too, simply comment them out and remove 
-   the row classes in template. Since you asked only to remove the 
-   “pattern information above”, we keep these slight cues. */
-.grade-low  { background-color: var(--grade-low-bg);  }
-.grade-med  { background-color: var(--grade-med-bg);  }
-.grade-good { background-color: var(--grade-good-bg); }
-.grade-high { background-color: var(--grade-high-bg); }
-
-/* Total row */
-.total-row {
+.marks-table thead th {
   background: var(--surface-alt);
-  font-weight: 700;
-}
-
-/* ============================================================================
-   9) FOOT NOTES / SIGNATURES
-   ========================================================================== */
-.footer-notes {
-  padding: .4rem .9rem 1rem;
-  font-size: .82rem;
-  color: var(--muted);
-}
-.signatures {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 1.2rem;
-  margin-top: 1rem;
-}
-.sig-box {
+  padding: 0.65rem;
   text-align: center;
-  border-top: 1px solid var(--border);
-  padding-top: .4rem;
-  font-weight: 500;
+  font-weight: 600;
+  border-bottom: 2px solid var(--border);
 }
 
-/* ============================================================================
-   10) BACK BUTTON SECTION
-   ========================================================================== */
-.back-section {
-  margin-top: 1.25rem;
-  margin-bottom: 1rem;
-  position: relative;
-  z-index: 2; /* keep well above anything else */
-}
-.back-section .btn {
-  border-radius: 999px;
+.marks-table tbody td {
+  padding: 0.6rem;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
 }
 
-/* ============================================================================
-   11) PRINT
-   Hide header, bottom nav etc when printing.
-   ========================================================================== */
+.highlight-row {
+  background-color: rgba(13, 110, 253, 0.05);
+}
+
+.screen-only { display: inherit; }
+.print-only { display: none; }
+
+/* Responsive tweaks */
+@media (max-width: 576px) {
+  .info-grid { grid-template-columns: 1fr; }
+  .action-bar { justify-content: center; }
+  .marks-table { font-size: 0.8rem; }
+}
+
+/* ======================== PRINT STYLES ======================== */
 @media print {
-  .app-header,
-  .bottom-nav,
-  .flash-stack,
-  .action-strip,
-  .back-section { display: none !important; }
+  @page {
+    size: A4 portrait;
+    margin: 10mm 8mm; /* tighter to keep it on 1 page */
+  }
 
-  main.container {
+  html, body {
+    background: white !important;
+    color: black !important;
+    font-size: 11pt; /* compact to fit one page */
+  }
+
+  .screen-only { display: none !important; }
+  .print-only { display: block !important; }
+
+  .container {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .app-header, .bottom-nav, .flash-stack, .action-bar, .back-section {
+    display: none !important;
+  }
+
+  .result-wrap {
     padding: 0 !important;
   }
 
   .marks-card {
     box-shadow: none !important;
-    border: 1px solid #000 !important;
+    border: none !important;
     border-radius: 0 !important;
+    margin: 0 !important;
+    transform: none !important;
   }
 
-  body {
-    background: #fff !important;
+  .brand-header {
+    background: #0d6efd !important;
+    color: white !important;
+    font-size: 1.2rem !important;
+    padding: 0.6rem 0.8rem !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .institute-details {
+    font-size: 0.85rem !important;
+    padding: 0.25rem 0 !important;
+  }
+
+  .info-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 0.25rem 0.75rem !important;
+    padding: 0.6rem 0.8rem !important;
+    font-size: 0.9rem !important;
+  }
+
+  .info-label { font-size: 0.8rem !important; }
+  .info-value { font-size: 0.9rem !important; }
+
+  .marks-table {
+    font-size: 0.9rem !important;
+    width: 100%;
+    margin-top: 0.2rem !important;
+  }
+
+  .marks-table thead th {
+    background: #f1f1f1 !important;
+    padding: 0.45rem !important;
+    font-size: 0.95rem !important;
+  }
+
+  .marks-table tbody td {
+    padding: 0.45rem !important;
+    font-size: 0.9rem !important;
+  }
+
+  .result-badge {
+    font-size: 0.9rem !important;
+    padding: 0.15rem 0.55rem !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .text-center.small {
+    font-size: 0.8rem !important;
+    margin-top: 0.6rem !important;
+  }
+
+  .d-flex.justify-content-around {
+    justify-content: center !important;
+    margin-top: 0.8rem !important;
+  }
+
+  .border-top {
+    border-top: 1.5px solid black !important;
+    font-weight: bold !important;
+    text-align: center !important;
+    width: 140px !important;
+    margin: auto !important;
+    padding-top: 0.35rem !important;
   }
 }
 </style>
 
+{% set badge_class = (
+  'fail' if student.percentage < 33 else
+  'third' if student.percentage < 50 else
+  'second' if student.percentage < 75 else 'first'
+) %}
+
 <div class="result-wrap container py-3">
-
-  <!-- =======================================================================
-       MARKS CARD (MAIN)
-       ===================================================================== -->
   <div class="marks-card" id="marksCard">
+    <div class="brand-header">GOVT. BOYS HIGH SCHOOL MAKHAMA</div>
+    <div class="institute-details">Affiliated with Board of Secondary Education • Est. 1985</div>
 
-    <!-- =================== BRAND HEADER =================== -->
-    <div class="brand-header">
-      Govt. BHS Makhama
-    </div>
-
-    <!-- =================== INFO BLOCK ===================== -->
-    <div class="info-block" aria-label="Student and exam information">
-      <div class="info-line">
-        <span class="info-label">Name:</span>
+    <div class="info-grid">
+      <div class="info-item">
+        <span class="info-label">Student Name</span>
         <span class="info-value">{{ student.name }}</span>
       </div>
-
-      <div class="info-line">
-        <span class="info-label">Roll Number:</span>
+      <div class="info-item">
+        <span class="info-label">Roll Number</span>
         <span class="info-value">{{ student.roll_number }}</span>
       </div>
-
-      <div class="info-line">
-        <span class="info-label">Class:</span>
+      <div class="info-item">
+        <span class="info-label">Class</span>
         <span class="info-value">{{ exam.class }}</span>
       </div>
-
-      <div class="info-line">
-        <span class="info-label">Exam Date:</span>
-        <span class="info-value">{{ exam.exam_date }}</span>
+      <div class="info-item">
+        <span class="info-label">Academic Year</span>
+        <span class="info-value">2023-2024</span>
       </div>
-
-      <div class="info-line">
-        <span class="info-label">Exam Name:</span>
+      <div class="info-item">
+        <span class="info-label">Exam Name</span>
         <span class="info-value">{{ exam.exam_name }}</span>
       </div>
-
-      <div class="info-line">
-        <span class="info-label">Percentage:</span>
+      <div class="info-item screen-only">
+        <span class="info-label">Exam Date</span>
+        <span class="info-value">{{ exam.exam_date }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Percentage & Division</span>
         <span class="info-value">
           {{ "%.2f"|format(student.percentage) }}%
-          {% set badge_class = (
-            'fail'   if student.percentage < 33 else
-            'third'  if student.percentage < 50 else
-            'second' if student.percentage < 75 else
-            'first'
-          ) %}
-          <span class="overall-badge {{ badge_class }}" aria-label="Overall Result Status">
+          <span class="result-badge {{ badge_class }}">
             {% if badge_class == 'fail' %}
               <i class="bi bi-x-circle"></i> Fail
             {% elif badge_class == 'third' %}
@@ -406,72 +312,56 @@ GOVT. BHS MAKHAMA — RESULT VIEW (ANDROID-STYLE, 500+ LINES, NO LEGEND BLOCK)
       </div>
     </div>
 
-    <!-- =================== ACTION STRIP =================== -->
-    <div class="action-strip">
-      <button class="btn btn-primary btn-sm ripple" id="btnPrint" type="button">
-        <i class="bi bi-printer-fill me-1"></i> Print / Download
+    <div class="action-bar screen-only">
+      <button class="btn btn-primary btn-sm action-btn" id="btnPrint">
+        <i class="bi bi-printer-fill"></i> Print
       </button>
-
-      <button class="btn btn-outline-secondary btn-sm ripple" id="btnShare" type="button">
-        <i class="bi bi-share me-1"></i> Share
+      <button class="btn btn-outline-secondary btn-sm action-btn" id="btnShare">
+        <i class="bi bi-share"></i> Share
       </button>
-
-      <button class="btn btn-outline-info btn-sm ripple ms-auto" id="btnCompact" type="button" aria-pressed="false">
-        <i class="bi bi-arrows-collapse me-1"></i> Compact view
+      <button class="btn btn-outline-info btn-sm action-btn ms-auto" id="btnCompact">
+        <i class="bi bi-arrows-collapse"></i> Compact View
       </button>
     </div>
 
-    <!-- =================== MARKS TABLE ==================== -->
-    <div class="table-wrap">
-      <div class="table-responsive">
-        <table class="table-marks" role="table" aria-label="Marks table">
-          <thead>
-            <tr>
-              <th scope="col">Subject</th>
-              <th scope="col">Marks Obtained</th>
-              <th scope="col">Total Marks</th>
-            </tr>
-          </thead>
-          <tbody>
-          {# NOTE: You said not to show per-subject percentage, so we don't. #}
+    <div class="p-3 pt-2">
+      <table class="marks-table">
+        <thead>
+          <tr><th>Subject</th><th>Marks Obtained</th><th>Max Marks</th></tr>
+        </thead>
+        <tbody>
           {% for subject in student.subjects %}
-            {% set pc = (subject.marks_obtained / subject.total_marks * 100) %}
-            {% set color_row = (
-              'grade-low' if pc < 33 else
-              'grade-med' if pc < 50 else
-              'grade-good' if pc < 75 else
-              'grade-high'
-            ) %}
-            <tr class="{{ color_row }}">
-              <td>{{ subject.subject }}</td>
-              <td>{{ subject.marks_obtained }}</td>
-              <td>{{ subject.total_marks }}</td>
-            </tr>
+          <tr {% if loop.index % 2 == 0 %}class="highlight-row"{% endif %}>
+            <td>{{ subject.subject }}</td>
+            <td>{{ subject.marks_obtained }}</td>
+            <td>{{ subject.total_marks }}</td>
+          </tr>
           {% endfor %}
-            <tr class="total-row">
-              <td>Total</td>
-              <td>{{ student.total_obtained }}</td>
-              <td>{{ student.total_max }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+          <tr style="background-color: var(--surface-alt); font-weight: bold;">
+            <td>Total</td>
+            <td>{{ student.total_obtained }}</td>
+            <td>{{ student.total_max }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
-    <!-- =================== FOOT NOTES & SIGNATURES ========= -->
-    <div class="footer-notes">
-      <em>Note:</em> This is a computer-generated result and does not require a physical signature.  
-      Please verify any discrepancy with the school administration.
-      <div class="signatures">
-        <div class="sig-box">Class Teacher</div>
-        <div class="sig-box">Vice Principal</div>
-        <div class="sig-box">Principal</div>
+    <div class="p-3 pt-0">
+      <div class="text-center small text-muted mb-2">
+        This is a computer-generated document and does not require a physical signature.
+      </div>
+      <div class="d-flex justify-content-around mt-3">
+        <div class="text-center">
+          <div class="border-top">Principal</div>
+        </div>
+      </div>
+      <div class="text-center mt-3 small text-muted">
+        <i class="bi bi-info-circle"></i> Any discrepancy should be reported within 7 days
       </div>
     </div>
   </div>
 
-  <!-- Safe space to keep the button from overlapping the bottom nav -->
-  <div class="back-section">
+  <div class="back-section mt-3 screen-only">
     <a href="{{ url_for('results') }}" class="btn btn-outline-primary w-100">
       <i class="bi bi-arrow-left"></i> Back to Results
     </a>
@@ -479,64 +369,36 @@ GOVT. BHS MAKHAMA — RESULT VIEW (ANDROID-STYLE, 500+ LINES, NO LEGEND BLOCK)
 </div>
 
 <script>
-/* =============================================================================
-   JS BEHAVIOR (print / share / compact / ripple)
-   ========================================================================== */
-document.addEventListener('DOMContentLoaded', function() {
-  const btnPrint   = document.getElementById('btnPrint');
-  const btnShare   = document.getElementById('btnShare');
-  const btnCompact = document.getElementById('btnCompact');
-  const marksCard  = document.getElementById('marksCard');
-
-  // ------------------ 1) Print / Download ------------------
-  btnPrint?.addEventListener('click', () => {
+document.addEventListener('DOMContentLoaded', function () {
+  document.getElementById('btnPrint')?.addEventListener('click', function () {
     window.print();
   });
 
-  // ------------------ 2) Share ------------------
-  btnShare?.addEventListener('click', async () => {
+  document.getElementById('btnShare')?.addEventListener('click', async function () {
     try {
       const shareData = {
-        title: document.title || 'Result',
-        text: 'Here is my result from Govt. BHS Makhama.',
+        title: 'My Academic Result',
+        text: `Check out my result from {{ student.name }}`,
         url: window.location.href
       };
       if (navigator.share) {
         await navigator.share(shareData);
       } else {
         await navigator.clipboard.writeText(window.location.href);
-        alert('Link copied to clipboard!');
+        alert('Result link copied to clipboard!');
       }
     } catch (err) {
-      console.error('Share failed:', err);
+      console.error('Error sharing:', err);
     }
   });
 
-  // ------------------ 3) Compact View ------------------
-  btnCompact?.addEventListener('click', () => {
-    const isPressed = btnCompact.getAttribute('aria-pressed') === 'true';
-    btnCompact.setAttribute('aria-pressed', String(!isPressed));
-    marksCard.classList.toggle('compact');
-    btnCompact.innerHTML = !isPressed 
-      ? '<i class="bi bi-arrows-expand me-1"></i> Normal view'
-      : '<i class="bi bi-arrows-collapse me-1"></i> Compact view';
+  document.getElementById('btnCompact')?.addEventListener('click', function () {
+    const card = document.getElementById('marksCard');
+    const isCompact = card.classList.toggle('compact-view');
+    this.innerHTML = isCompact
+      ? '<i class="bi bi-arrows-expand"></i> Normal View'
+      : '<i class="bi bi-arrows-collapse"></i> Compact View';
   });
-
-  // ------------------ 4) Ripple ------------------
-  document.addEventListener('click', function(e){
-    const target = e.target.closest('.ripple');
-    if(!target) return;
-
-    const rect = target.getBoundingClientRect();
-    const ink = document.createElement('span');
-    ink.classList.add('r-ink');
-    ink.style.left = (e.clientX - rect.left) + 'px';
-    ink.style.top  = (e.clientY - rect.top)  + 'px';
-    ink.style.width = ink.style.height = Math.max(rect.width, rect.height) + 'px';
-
-    target.appendChild(ink);
-    setTimeout(()=> ink.remove(), 600);
-  }, false);
 });
 </script>
 {% endblock %}
