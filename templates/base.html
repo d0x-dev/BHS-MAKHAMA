@@ -25,6 +25,7 @@
       --anim-fast: .18s cubic-bezier(.2,.8,.2,1);
       --anim-mid: .28s cubic-bezier(.2,.8,.2,1);
     }
+
     [data-bs-theme="dark"]{
       --surface: #1e1e1e;
       --text: #f8f9fa;
@@ -37,19 +38,38 @@
       color: var(--text);
     }
 
-    html, body{
-      height:100%;
+    html, body {
+      height: 100%;
       background: #f2f2f2;
       color: var(--text);
       transition: background-color var(--anim-mid), color var(--anim-mid);
     }
-    body{
+
+    body {
       font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
       padding-bottom: var(--bottom-h);
     }
 
+    /* SCORE X Animated Logo */
+    .app-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      background: linear-gradient(90deg, #fff 0%, #d0e1ff 50%, #fff 100%);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shine 3s infinite linear;
+    }
+
+    @keyframes shine {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
     /* Top App Bar */
-    .app-header{
+    .app-header {
       position: fixed;
       inset: 0 0 auto 0;
       height: var(--header-h);
@@ -63,75 +83,29 @@
       box-shadow: var(--shadow-strong);
     }
 
-    /* SCORE X animated logo */
-    .scorex-logo{
-      display: inline-flex;
-      align-items: center;
-      gap: 1px;
-      font-weight: 800;
-      font-size: 1.25rem;
-      letter-spacing: .12rem;
-      line-height: 1;
-      color: #fff;
-      opacity: 0;
-      position: relative;
-    }
-    .scorex-logo.animate {
-      opacity: 1;
-      animation: popIn .55s cubic-bezier(.2,.8,.2,1) forwards;
-    }
-    .scorex-logo.animate span{
-      display: inline-block;
-      animation: letterIn .55s cubic-bezier(.2,.8,.2,1) forwards;
-    }
-    .scorex-logo.animate span:nth-child(1){ animation-delay:.05s; }
-    .scorex-logo.animate span:nth-child(2){ animation-delay:.10s; }
-    .scorex-logo.animate span:nth-child(3){ animation-delay:.15s; }
-    .scorex-logo.animate span:nth-child(4){ animation-delay:.20s; }
-    .scorex-logo.animate span:nth-child(5){ animation-delay:.25s; }
-    .scorex-logo.animate span:nth-child(6){ animation-delay:.30s; }
-
-    @keyframes letterIn{
-      0%{ transform: translateY(40%) rotateX(90deg) scale(.9); opacity:0; }
-      100%{ transform: translateY(0) rotateX(0) scale(1); opacity:1; }
-    }
-    @keyframes popIn{
-      0%{ opacity:0; transform: translateY(4px) scale(.98); }
-      100%{ opacity:1; transform: translateY(0) scale(1); }
-    }
-
-    /* Shine effect */
-    .scorex-logo.animate::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -50%;
-      width: 50%;
-      height: 100%;
-      background: linear-gradient(120deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.1) 100%);
-      transform: skewX(-25deg);
-      animation: shine 1.5s ease-in-out 0.8s forwards;
-    }
-    @keyframes shine {
-      0% { left: -50%; }
-      100% { left: 120%; }
-    }
-
-    .theme-toggle{
+    .theme-toggle {
       border: none;
       background: transparent;
       padding: 6px;
       cursor: pointer;
-      display:flex;
-      align-items:center;
-      justify-content:center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: transform .25s;
     }
-    .theme-toggle:active{
+
+    .theme-toggle svg {
+      fill: #ffffff;
+      stroke: #ffffff;
+      width: 26px;
+      height: 26px;
+    }
+
+    .theme-toggle:active {
       transform: scale(.92) rotate(8deg);
     }
 
-    /* profile img */
+    /* Profile image */
     .profile-img {
       width: 32px;
       height: 32px;
@@ -139,78 +113,88 @@
       border: 2px solid rgba(255,255,255,0.3);
       transition: border-color 0.2s;
     }
+
     .profile-img:hover {
       border-color: rgba(255,255,255,0.6);
     }
 
-    main.container{
+    main.container {
       padding-top: calc(var(--header-h) + .75rem);
       padding-bottom: 1.25rem;
       transition: padding var(--anim-fast);
     }
 
-    /* Dark mode fixes */
-    [data-bs-theme="dark"] body{
-      background-color:#121212 !important;
-      color:#f1f1f1 !important;
+    /* Dark Mode Fixes */
+    [data-bs-theme="dark"] body {
+      background-color: #121212 !important;
+      color: #f1f1f1 !important;
     }
-    [data-bs-theme="dark"] .card{
-      background-color:#1e1e1e !important;
-      color:#f1f1f1 !important;
-      border-color:#333 !important;
+
+    [data-bs-theme="dark"] .card {
+      background-color: #1e1e1e !important;
+      color: #f1f1f1 !important;
+      border-color: #333 !important;
     }
-    [data-bs-theme="dark"] .table{
-      color:#f1f1f1;
+
+    [data-bs-theme="dark"] .table {
+      color: #f1f1f1;
     }
-    [data-bs-theme="dark"] .table thead{
-      color:#f1f1f1;
-      background:#2a2a2a;
+
+    [data-bs-theme="dark"] .table thead {
+      color: #f1f1f1;
+      background: #2a2a2a;
     }
+
     [data-bs-theme="dark"] .form-control,
-    [data-bs-theme="dark"] .form-select{
-      background:#1f1f1f;
-      color:#f1f1f1;
-      border-color:#444;
+    [data-bs-theme="dark"] .form-select {
+      background: #1f1f1f;
+      color: #f1f1f1;
+      border-color: #444;
     }
+
     [data-bs-theme="dark"] .form-control:focus,
-    [data-bs-theme="dark"] .form-select:focus{
-      background:#1f1f1f;
-      color:#f1f1f1;
+    [data-bs-theme="dark"] .form-select:focus {
+      background: #1f1f1f;
+      color: #f1f1f1;
       border-color: var(--primary);
       box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, .15);
     }
-    [data-bs-theme="dark"] .bg-primary{
-      background-color:#0d6efd !important;
-    }
-    [data-bs-theme="dark"] .btn-light{
-      background-color:#f1f1f1 !important;
-      color:#000 !important;
+
+    [data-bs-theme="dark"] .bg-primary {
+      background-color: #0d6efd !important;
     }
 
-    /* Flash toasts */
-    .flash-stack{
+    [data-bs-theme="dark"] .btn-light {
+      background-color: #f1f1f1 !important;
+      color: #000 !important;
+    }
+
+    /* Flash messages */
+    .flash-stack {
       position: fixed;
       top: calc(var(--header-h) + .5rem);
       right: .75rem;
       left: .75rem;
-      z-index:1080;
-      display:flex;
-      flex-direction:column;
-      gap:.5rem;
-      pointer-events:none;
+      z-index: 1080;
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+      pointer-events: none;
     }
-    .flash-stack .alert{
-      pointer-events:auto;
+
+    .flash-stack .alert {
+      pointer-events: auto;
       box-shadow: var(--shadow);
       animation: slideDown var(--anim-mid);
     }
-    @keyframes slideDown{
-      from{opacity:0;transform: translateY(-6px);}
-      to{opacity:1;transform: translateY(0);}
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     /* Bottom Navigation */
-    .bottom-nav{
+    .bottom-nav {
       position: fixed;
       inset: auto 0 0 0;
       height: var(--bottom-h);
@@ -223,50 +207,58 @@
       box-shadow: 0 -4px 16px rgba(0,0,0,.03);
       transition: background var(--anim-mid), border-color var(--anim-mid);
     }
-    [data-bs-theme="dark"] .bottom-nav{
+
+    [data-bs-theme="dark"] .bottom-nav {
       border-color: rgba(255,255,255,.06);
-      background:#1a1a1a;
+      background: #1a1a1a;
       box-shadow: 0 -4px 16px rgba(0,0,0,.18);
     }
-    .bottom-link{
+
+    .bottom-link {
       text-decoration: none;
       color: var(--muted);
-      font-size:.78rem;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      gap:2px;
-      width:20%;
-      height:100%;
-      position:relative;
+      font-size: .78rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      width: 20%;
+      height: 100%;
+      position: relative;
       transition: color var(--anim-fast);
     }
-    .bottom-link i{
-      font-size:1.25rem;
-      line-height:1;
+
+    .bottom-link i {
+      font-size: 1.25rem;
+      line-height: 1;
     }
-    .bottom-link.active{
+
+    .bottom-link.active {
       color: var(--primary);
-      font-weight:600;
+      font-weight: 600;
     }
-    .bottom-link::after{
-      content:'';
-      position:absolute;
-      top:0;
-      left:50%;
-      transform:translateX(-50%) scaleX(0);
+
+    .bottom-link::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%) scaleX(0);
       width: 56%;
-      height:2px;
+      height: 2px;
       background: var(--primary);
       border-radius: 999px;
       transition: transform var(--anim-fast);
     }
-    .bottom-link.active::after{
+
+    .bottom-link.active::after {
       transform: translateX(-50%) scaleX(1);
     }
 
-    footer{display:none;}
+    footer {
+      display: none;
+    }
   </style>
 
   {% block extra_css %}{% endblock %}
@@ -275,16 +267,18 @@
 
   <!-- Top App Bar -->
   <div class="app-header">
-    <span class="scorex-logo" id="scorexLogo">
-      <span>S</span><span>C</span><span>O</span><span>R</span><span>E</span><span>X</span>
-    </span>
+    <span class="app-title">SCORE X</span>
     <div class="d-flex align-items-center">
-      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme"></button>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <i class="bi bi-brightness-high-fill"></i>
+      </button>
       {% if session.get('logged_in') %}
       <a href="{{ url_for('my_docs') }}" class="ms-2 d-block text-white position-relative" aria-label="Notifications">
         <i class="bi bi-bell-fill"></i>
         {% if session.get('has_unread_docs') %}
-        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">!</span>
+        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+          !
+        </span>
         {% endif %}
       </a>
       <a href="{{ url_for('account') }}" class="ms-2 d-block text-white" aria-label="Account">
@@ -315,20 +309,30 @@
 
   <!-- Bottom Navigation -->
   <nav class="bottom-nav">
-    <a href="{{ url_for('home') }}" class="bottom-link {% if request.endpoint == 'home' %}active{% endif %}">
-      <i class="bi bi-house-door-fill"></i><span>Home</span>
+    <a href="{{ url_for('home') }}"
+       class="bottom-link {% if request.endpoint == 'home' %}active{% endif %}">
+      <i class="bi bi-house-door-fill"></i>
+      <span>Home</span>
     </a>
-    <a href="{{ url_for('documents') }}" class="bottom-link {% if request.endpoint == 'documents' %}active{% endif %}">
-      <i class="bi bi-file-earmark-text"></i><span>Docs</span>
+    <a href="{{ url_for('documents') }}"
+       class="bottom-link {% if request.endpoint == 'documents' %}active{% endif %}">
+      <i class="bi bi-file-earmark-text"></i>
+      <span>Docs</span>
     </a>
-    <a href="{{ url_for('notifications') }}" class="bottom-link {% if request.endpoint == 'notifications' %}active{% endif %}">
-      <i class="bi bi-bell-fill"></i><span>Alerts</span>
+    <a href="{{ url_for('notifications') }}"
+       class="bottom-link {% if request.endpoint == 'notifications' %}active{% endif %}">
+      <i class="bi bi-bell-fill"></i>
+      <span>Alerts</span>
     </a>
-    <a href="{{ url_for('syllabus') }}" class="bottom-link {% if request.endpoint == 'syllabus' %}active{% endif %}">
-      <i class="bi bi-journal-bookmark-fill"></i><span>Syllabus</span>
+    <a href="{{ url_for('syllabus') }}"
+       class="bottom-link {% if request.endpoint == 'syllabus' %}active{% endif %}">
+      <i class="bi bi-journal-bookmark-fill"></i>
+      <span>Syllabus</span>
     </a>
-    <a href="{{ url_for('about') }}" class="bottom-link {% if request.endpoint == 'about' %}active{% endif %}">
-      <i class="bi bi-info-circle-fill"></i><span>About</span>
+    <a href="{{ url_for('about') }}"
+       class="bottom-link {% if request.endpoint == 'about' %}active{% endif %}">
+      <i class="bi bi-info-circle-fill"></i>
+      <span>About</span>
     </a>
   </nav>
 
@@ -336,25 +340,36 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      const logo = document.getElementById('scorexLogo');
-      setTimeout(() => logo.classList.add('animate'), 100);
-
       const themeToggle = document.getElementById('themeToggle');
       const html = document.documentElement;
-      const saved = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 
-      function applyTheme(mode){
-        html.setAttribute('data-bs-theme', mode);
-        localStorage.setItem('theme', mode);
+      const savedTheme = localStorage.getItem('theme') ||
+        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+      function setIcon(mode) {
+        themeToggle.innerHTML = '';
+        const icon = document.createElement('i');
+        icon.className = mode === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
+        themeToggle.appendChild(icon);
       }
-      applyTheme(saved);
+
+      function applyTheme(mode) {
+        html.setAttribute('data-bs-theme', mode);
+        setIcon(mode);
+      }
+
+      applyTheme(savedTheme);
+
       themeToggle.addEventListener('click', () => {
-        applyTheme(html.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark');
+        const next = html.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
+        applyTheme(next);
+        localStorage.setItem('theme', next);
       });
 
+      // Auto-close flash
       setTimeout(() => {
-        document.querySelectorAll('.flash-stack .alert').forEach(a=>{
-          try{ bootstrap.Alert.getOrCreateInstance(a).close(); }catch(e){}
+        document.querySelectorAll('.flash-stack .alert').forEach(a => {
+          try { bootstrap.Alert.getOrCreateInstance(a).close(); } catch(e) {}
         });
       }, 4000);
     });
