@@ -1,515 +1,437 @@
-{% extends "base.html" %}
-{% block title %}Home - GOVT. BOYS HIGH SCHOOL PETH MAKHAMA{% endblock %}
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>School Portal – Login</title>
 
-{% block content %}
-<style>
-/* =========================================================================
-   THEME TOKENS (scoped to this page)
-   -------------------------------------------------------------------------
-   You can tweak the gradients, radiuses, and shadows to match your brand.
-   ========================================================================= */
-:root {
-  --grad-1: linear-gradient(135deg, #0d6efd 0%, #5b8cff 100%);
-  --grad-2: linear-gradient(135deg, #6610f2 0%, #b37aff 100%);
-  --grad-3: linear-gradient(135deg, #ff6a00 0%, #ee0979 100%);
-  --card-radius: 18px;
-  --soft-shadow: 0 6px 18px rgba(0,0,0,.08);
-  --soft-shadow-strong: 0 10px 24px rgba(0,0,0,.12);
-  --soft-shadow-dark: 0 6px 18px rgba(0,0,0,.22);
-  --wave-opacity: .15;
-}
+  <!-- Bootstrap & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
 
-/* =========================================================================
-   HERO (Android-y, bold, elevated)
-   ========================================================================= */
-.hero-android {
-  background: var(--grad-1);
-  color: #fff;
-  border-radius: 20px;
-  padding: 2.2rem 1.2rem 3.8rem;
-  position: relative;
-  overflow: hidden;
-  box-shadow: var(--soft-shadow);
-}
-[data-bs-theme="dark"] .hero-android,
-.dark-mode .hero-android {
-  box-shadow: var(--soft-shadow-dark);
-}
-.hero-android .title {
-  font-weight: 800;
-  letter-spacing: .2px;
-  line-height: 1.15;
-}
-.hero-android .lead {
-  opacity: .9;
-}
-.hero-android .badge-soft {
-  backdrop-filter: blur(4px);
-}
-[data-bs-theme="dark"] .badge-soft,
-.dark-mode .badge-soft {
-  background: rgba(255,255,255,.08);
-}
-.wave {
-  position: absolute;
-  left: 0;
-  bottom: -1px;
-  width: 100%;
-}
-.hero-btn {
-  border-radius: 999px;
-  padding: .6rem 1.2rem;
-  font-weight: 600;
-}
+  <style>
+    :root{
+      --grad-1: linear-gradient(135deg, #0d6efd 0%, #5b8cff 100%);
+      --grad-2: linear-gradient(135deg, #6610f2 0%, #b37aff 100%);
+      --glass-bg: rgba(255, 255, 255, 0.18);
+      --glass-border: rgba(255, 255, 255, 0.25);
+      --soft-shadow: 0 16px 32px rgba(0,0,0,.15);
+      --toast-z: 2000;
+    }
 
-/* =========================================================================
-   CHIPS (Horizontal tiny shortcuts)
-   ========================================================================= */
-.chips {
-  display: flex;
-  overflow-x: auto;
-  gap: .5rem;
-  padding-bottom: .35rem;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE 10+ */
-}
-.chips::-webkit-scrollbar { display: none; } /* Chrome/Safari */
-.chip {
-  white-space: nowrap;
-  border-radius: 999px;
-  padding: .35rem .85rem;
-  background: rgba(13, 110, 253, .08);
-  color: #0d6efd;
-  font-size: .85rem;
-  font-weight: 600;
-  border: 0;
-  text-decoration: none;
-}
-[data-bs-theme="dark"] .chip,
-.dark-mode .chip {
-  background: rgba(255,255,255,.06);
-  color: #0dcaf0;
-}
+    [data-bs-theme="dark"]{
+      --glass-bg: rgba(33, 33, 33, 0.35);
+      --glass-border: rgba(255, 255, 255, 0.08);
+    }
 
-/* =========================================================================
-   QUICK LINKS GRID
-   - No "Open" button – the whole tile is tappable
-   - 2 columns on mobile, 4+ on desktop
-   ========================================================================= */
-.quick-links-title {
-  font-size: 1.35rem;
-  font-weight: 800;
-  margin-bottom: .85rem;
-}
-.quick-links-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-}
-@media (min-width: 768px) {
-  .quick-links-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-.quick-link {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem 0.5rem;
-  border-radius: var(--card-radius);
-  background: #ffffff;
-  box-shadow: var(--soft-shadow);
-  transition: all 0.2s ease;
-  text-decoration: none;
-  color: inherit;
-  height: 100%;
-  position: relative;
-  overflow: hidden;
-}
-[data-bs-theme="dark"] .quick-link,
-.dark-mode .quick-link {
-  background: #2a2a2a;
-  box-shadow: var(--soft-shadow-dark);
-}
-.quick-link::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  opacity: 0;
-  background: rgba(0,0,0,.03);
-  transition: opacity .18s ease;
-}
-.quick-link:hover::after {
-  opacity: 1;
-}
-.quick-link:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--soft-shadow-strong);
-}
-.quick-link-icon {
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 8px;
-  font-size: 1.2rem;
-}
-.quick-link-name {
-  font-weight: 600;
-  font-size: 0.9rem;
-  text-align: center;
-  margin: 0;
-}
-.quick-link small {
-  font-size: .75rem;
-  opacity: .65;
-}
+    html, body{
+      height: 100%;
+      overflow: hidden; /* SCROLL LOCKED */
+    }
 
-/* =========================================================================
-   SECTION TITLES
-   ========================================================================= */
-.section-title,
-.section-title-big {
-  display: flex;
-  align-items: center;
-  gap: .35rem;
-}
-.section-title {
-  font-size: 1.15rem;
-  font-weight: 700;
-  margin: 0 0 .75rem;
-}
-.section-title-big {
-  font-size: 1.35rem;
-  font-weight: 800;
-  margin-bottom: .85rem;
-}
+    body{
+      font-family: "Segoe UI", Roboto, sans-serif;
+      background: radial-gradient(circle at 10% 20%, #0d6efd 0%, #6610f2 100%);
+      overflow-x: hidden;
+      position: relative;
+      color: #212529;
+    }
 
-/* =========================================================================
-   H-SCROLL (Notifications & Syllabus carousels)
-   ========================================================================= */
-.h-scroll {
-  display: flex;
-  overflow-x: auto;
-  gap: .75rem;
-  padding-bottom: .35rem;
-  scroll-snap-type: x mandatory;
-}
-.h-scroll > * {
-  scroll-snap-align: start;
-  min-width: 85%;
-}
-@media (min-width: 768px) {
-  .h-scroll > * { min-width: 48%; }
-}
+    [data-bs-theme="dark"] body{
+      color: #e9ecef;
+    }
 
-/* =========================================================================
-   CARDS (Android-like)
-   ========================================================================= */
-.card-android {
-  border: 0;
-  border-radius: var(--card-radius);
-  box-shadow: var(--soft-shadow);
-  transition: transform .18s ease, box-shadow .18s ease;
-}
-[data-bs-theme="dark"] .card-android,
-.dark-mode .card-android {
-  box-shadow: var(--soft-shadow-dark);
-}
-.card-android:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--soft-shadow-strong);
-}
+    /* Animated blobs background */
+    .blob{
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: .55;
+      animation: float 18s ease-in-out infinite;
+      mix-blend-mode: screen;
+    }
+    .blob.blob1{ background: #0d6efd; width: 400px; height: 400px; top: -100px; left: -120px; animation-delay: 0s; }
+    .blob.blob2{ background: #6610f2; width: 420px; height: 420px; bottom: -130px; right: -110px; animation-delay: 3s; }
+    .blob.blob3{ background: #ff4d6d; width: 360px; height: 360px; top: 40%; left: -140px; animation-delay: 6s; }
 
-/* =========================================================================
-   UTILITIES
-   ========================================================================= */
-.text-ellipsis-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.badge-soft {
-  background: rgba(255,255,255,.15);
-  color: #fff;
-  border-radius: 999px;
-}
+    @keyframes float{
+      0%, 100%{ transform: translate(0,0) scale(1); }
+      50%{ transform: translate(40px, -30px) scale(1.05); }
+    }
 
-/* =========================================================================
-   REVEAL ON SCROLL ANIMATION
-   ========================================================================= */
-@keyframes fadeSlideUp {
-  0%   { opacity: 0; transform: translateY(12px); }
-  100% { opacity: 1; transform: translateY(0);     }
-}
-.reveal {
-  opacity: 0;
-  transform: translateY(12px);
-  transition: all .6s cubic-bezier(.2,.8,.2,1);
-}
-.reveal.show {
-  opacity: 1;
-  transform: translateY(0);
-}
+    /* Center wrapper */
+    .login-wrapper{
+      min-height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+      position: relative;
+      z-index: 2;
+    }
 
-/* =========================================================================
-   DARK MODE SCROLLBARS
-   ========================================================================= */
-[data-bs-theme="dark"] .h-scroll::-webkit-scrollbar,
-[data-bs-theme="dark"] .chips::-webkit-scrollbar,
-.dark-mode .h-scroll::-webkit-scrollbar,
-.dark-mode .chips::-webkit-scrollbar {
-  background: transparent;
-}
-</style>
+    /* Glass card */
+    .card-glass{
+      width: 100%;
+      max-width: 420px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 22px;
+      box-shadow: var(--soft-shadow);
+      overflow: hidden;
+      transform: translateY(6px);
+      opacity: 0;
+      animation: popIn .6s cubic-bezier(.2,.8,.2,1) forwards .2s;
+    }
 
-<!-- =========================================================================
-     HERO SECTION (with animated wave)
-     ========================================================================= -->
-<section class="hero-android mb-4 reveal">
-  <div class="d-flex flex-column align-items-center text-center">
-    <span class="badge badge-soft mb-2 px-2 py-1">Welcome</span>
-
-    {# Add span.gradient if you want animated gradient text #}
-    <h1 class="title mb-2">
-      GOVT. BOYS HIGH SCHOOL<br/>PETH MAKHAMA
-    </h1>
-
-    <p class="lead mb-3">
-      A premier institution dedicated to excellence in education
-    </p>
-
-    <a href="{{ url_for('about') }}" class="btn btn-light hero-btn">
-      <i class="bi bi-info-circle-fill me-1"></i>
-      Learn More
-    </a>
-  </div>
-
-  <!-- subtle animated wave -->
-  <svg class="wave" viewBox="0 0 1440 120" preserveAspectRatio="none">
-    <path fill="rgba(255,255,255,var(--wave-opacity))">
-      <animate attributeName="d" dur="10s" repeatCount="indefinite"
-        values="
-        M0,64L80,69.3C160,75,320,85,480,85.3C640,85,800,75,960,69.3C1120,64,1280,64,1360,64L1440,64L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z;
-        M0,96L80,80C160,64,320,32,480,21.3C640,11,800,21,960,37.3C1120,53,1280,75,1360,85.3L1440,96L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z;
-        M0,64L80,69.3C160,75,320,85,480,85.3C640,85,800,75,960,69.3C1120,64,1280,64,1360,64L1440,64L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z
-        " />
-    </path>
-  </svg>
-</section>
-
-<!-- =========================================================================
-     QUICK CHIPS (OPTIONAL SHORTCUTS)
-     ========================================================================= -->
-<div class="chips mb-3 reveal">
-  <a href="{{ url_for('syllabus') }}"    class="chip"><i class="bi bi-journal-bookmark me-1"></i> Syllabus</a>
-  <a href="{{ url_for('notifications') }}" class="chip"><i class="bi bi-bell me-1"></i> Notifications</a>
-  <a href="{{ url_for('documents') }}"  class="chip"><i class="bi bi-file-earmark-text me-1"></i> Documents</a>
-  <a href="{{ url_for('books') }}"      class="chip"><i class="bi bi-book me-1"></i> Books</a>
-  <a href="{{ url_for('homework') }}"   class="chip"><i class="bi bi-house-door me-1"></i> Homework</a>
-  <a href="{{ url_for('classwork') }}"  class="chip"><i class="bi bi-journal-text me-1"></i> Class Work</a>
-  <a href="{{ url_for('about') }}"      class="chip"><i class="bi bi-info-circle me-1"></i> About</a>
-</div>
-
-<!-- =========================================================================
-     QUICK LINKS (GRID) - Tappable tiles, no "Open" buttons
-     ========================================================================= -->
-<section class="mb-4 reveal">
-  <h2 class="quick-links-title">Quick Links</h2>
-
-  <div class="quick-links-grid">
-    <!-- Syllabus -->
-    <a href="{{ url_for('syllabus') }}" class="quick-link">
-      <div class="quick-link-icon bg-primary text-white">
-        <i class="bi bi-journal-bookmark"></i>
-      </div>
-      <p class="quick-link-name">Syllabus</p>
-      <small>View and download</small>
-    </a>
-
-    <!-- Notifications -->
-    <a href="{{ url_for('notifications') }}" class="quick-link">
-      <div class="quick-link-icon bg-danger text-white">
-        <i class="bi bi-megaphone"></i>
-      </div>
-      <p class="quick-link-name">Notifications</p>
-      <small>Latest announcements</small>
-    </a>
-
-    <!-- Results -->
-    <a href="{{ url_for('results') }}" class="quick-link">
-      <div class="quick-link-icon" style="background:#20c997; color:#fff;">
-        <i class="bi bi-clipboard-data"></i>
-      </div>
-      <p class="quick-link-name">Results</p>
-      <small>Check your marks</small>
-    </a>
-
-    <!-- Document Request -->
-    <a href="{{ url_for('doc_request') }}" class="quick-link">
-      <div class="quick-link-icon" style="background:#6f42c1; color:#fff;">
-        <i class="bi bi-file-earmark-arrow-down"></i>
-      </div>
-      <p class="quick-link-name">Get Docs</p>
-      <small>Request documents</small>
-    </a>
-
-    <!-- Contact -->
-    <a href="{{ url_for('contact') }}" class="quick-link">
-      <div class="quick-link-icon bg-secondary text-white">
-        <i class="bi bi-telephone"></i>
-      </div>
-      <p class="quick-link-name">Contact</p>
-      <small>Get in touch</small>
-    </a>
-
-    <!-- Class Work -->
-    <a href="{{ url_for('classwork') }}" class="quick-link">
-      <div class="quick-link-icon bg-info text-white">
-        <i class="bi bi-journal-text"></i>
-      </div>
-      <p class="quick-link-name">Class Work</p>
-      <small>Today's work</small>
-    </a>
-
-    <!-- Homework -->
-    <a href="{{ url_for('homework') }}" class="quick-link">
-      <div class="quick-link-icon bg-warning text-white">
-        <i class="bi bi-house-door"></i>
-      </div>
-      <p class="quick-link-name">Homework</p>
-      <small>Assigned tasks</small>
-    </a>
-
-    <!-- Books -->
-    <a href="{{ url_for('books') }}" class="quick-link">
-      <div class="quick-link-icon bg-dark text-white">
-        <i class="bi bi-book"></i>
-      </div>
-      <p class="quick-link-name">Books</p>
-      <small>School books</small>
-    </a>
-
-    <!-- Documents -->
-    <a href="{{ url_for('documents') }}" class="quick-link">
-      <div class="quick-link-icon bg-success text-white">
-        <i class="bi bi-file-earmark-text"></i>
-      </div>
-      <p class="quick-link-name">Documents</p>
-      <small>Official docs</small>
-    </a>
-
-    <!-- About -->
-    <a href="{{ url_for('about') }}" class="quick-link">
-      <div class="quick-link-icon" style="background:#6f42c1; color:#fff;">
-        <i class="bi bi-info-circle-fill"></i>
-      </div>
-      <p class="quick-link-name">About</p>
-      <small>Know our school</small>
-    </a>
-  </div>
-</section>
-
-<!-- =========================================================================
-     LATEST NOTIFICATIONS (HORIZONTAL SCROLLER)
-     ========================================================================= -->
-<section class="mb-4 reveal">
-  <div class="d-flex justify-content-between align-items-center">
-    <h2 class="section-title">Latest Notifications</h2>
-    <a href="{{ url_for('notifications') }}" class="btn btn-link btn-sm text-decoration-none">
-      View All <i class="bi bi-arrow-right"></i>
-    </a>
-  </div>
-
-  <div class="h-scroll">
-    {% for notice in pinned_notices %}
-    <div class="card card-android">
-      <div class="card-header d-flex justify-content-between align-items-center py-2 {% if notice['is_pinned'] %}bg-warning text-dark{% else %}bg-light{% endif %}">
-        <span class="small d-flex align-items-center">
-          {% if notice['is_pinned'] %}
-            <i class="bi bi-pin-angle-fill me-2"></i>
-          {% endif %}
-          {{ notice['title'] }}
-        </span>
-        <small class="text-muted">{{ notice['date_posted'].split()[0] }}</small>
-      </div>
-      <div class="card-body">
-        <p class="small mb-0">{{ notice['content'] }}</p>
-      </div>
-    </div>
-    {% else %}
-    <div class="card card-android w-100">
-      <div class="card-body">
-        <div class="alert alert-info mb-0 py-2">
-          No notifications available at this time.
-        </div>
-      </div>
-    </div>
-    {% endfor %}
-  </div>
-</section>
-
-<!-- =========================================================================
-     RECENT SYLLABUS (HORIZONTAL SCROLLER)
-     ========================================================================= -->
-<section class="mb-5 reveal">
-  <div class="d-flex justify-content-between align-items-center">
-    <h2 class="section-title">Recent Syllabus</h2>
-    <a href="{{ url_for('syllabus') }}" class="btn btn-link btn-sm text-decoration-none">
-      View All <i class="bi bi-arrow-right"></i>
-    </a>
-  </div>
-
-  <div class="h-scroll">
-    {% for syllabus in recent_syllabus %}
-    <div class="card card-android">
-      <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-2">
-        <span class="small">{{ syllabus['class_name'] }} - {{ syllabus['subject'] }}</span>
-        <small>{{ syllabus['upload_date'].split()[0] }}</small>
-      </div>
-      <div class="card-body">
-        <p class="small mb-2">
-          <strong>Exam:</strong> {{ syllabus['exam_name'] }}<br>
-          <strong>Year/Month:</strong> {{ syllabus['year'] }}/{{ syllabus['month'] }}
-        </p>
-        <a href="{{ url_for('download_file', filename=syllabus['filename']) }}" class="btn btn-primary btn-sm">
-          <i class="bi bi-download"></i> Download
-        </a>
-      </div>
-    </div>
-    {% else %}
-    <div class="card card-android w-100">
-      <div class="card-body">
-        <div class="alert alert-info mb-0 py-2">
-          No syllabus available yet. Please check back later.
-        </div>
-      </div>
-    </div>
-    {% endfor %}
-  </div>
-</section>
-
-<script>
-/* =========================================================================
-   REVEAL ON SCROLL (no external lib)
-   ========================================================================= */
-document.addEventListener('DOMContentLoaded', () => {
-  const els = document.querySelectorAll('.reveal');
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('show');
-        observer.unobserve(entry.target);
+    @keyframes popIn{
+      to{
+        transform: translateY(0);
+        opacity: 1;
       }
-    });
-  }, { threshold: 0.08 });
+    }
 
-  els.forEach(el => observer.observe(el));
-});
-</script>
-{% endblock %}
+    .card-header{
+      background: transparent;
+      border: 0;
+      padding: 1.5rem 1.5rem 0 1.5rem;
+      text-align: center;
+    }
+
+    .brand-circle{
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.2);
+      display: grid;
+      place-items: center;
+      margin: 0 auto 1rem;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+
+    .brand-circle i{
+      font-size: 2rem;
+      color: #fff;
+    }
+
+    .card-title{
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: .2px;
+    }
+
+    .card-subtitle{
+      color: rgba(255,255,255,.85);
+      font-size: .9rem;
+    }
+
+    .card-body{
+      padding: 1.5rem;
+    }
+
+    label.form-label{
+      font-weight: 600;
+      font-size: .9rem;
+    }
+
+    .input-group-text{
+      background: rgba(255,255,255,.08);
+      border: 0;
+      color: #6c757d;
+    }
+
+    .form-control{
+      background: rgba(255,255,255,.65);
+      border: 0;
+      box-shadow: none !important;
+      transition: background .2s ease;
+    }
+
+    .form-control:focus{
+      background: rgba(255,255,255,.85);
+    }
+
+    [data-bs-theme="dark"] .form-control{
+      background: rgba(255,255,255,.06);
+      color: #fff;
+    }
+    [data-bs-theme="dark"] .form-control:focus{
+      background: rgba(255,255,255,.10);
+      color: #fff;
+    }
+
+    .btn-primary{
+      border-radius: 999px;
+      font-weight: 600;
+      box-shadow: 0 6px 16px rgba(13,110,253,.35);
+      transition: transform .12s ease, box-shadow .12s ease;
+    }
+    .btn-primary:active{
+      transform: scale(.98);
+      box-shadow: 0 2px 8px rgba(13,110,253,.2);
+    }
+
+    .divider{
+      height: 1px;
+      background: rgba(255,255,255,.15);
+      margin: 1.25rem 0;
+    }
+
+    .text-muted a{
+      text-decoration: none;
+    }
+
+    .admin-link a{
+      text-decoration: none;
+    }
+
+    /* Flash messages as toasts (top-right) */
+    .flash-messages{
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: var(--toast-z);
+      width: calc(100% - 32px);
+      max-width: 360px;
+    }
+    .flash-messages .alert{
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      background: rgba(255,255,255,.85);
+      border: 0;
+      box-shadow: 0 8px 20px rgba(0,0,0,.12);
+      animation: slideIn .35s ease;
+    }
+    [data-bs-theme="dark"] .flash-messages .alert{
+      background: rgba(33,33,33,.85);
+      color: #fff;
+    }
+
+    @keyframes slideIn{
+      from{ opacity: 0; transform: translateX(100%); }
+      to  { opacity: 1; transform: translateX(0);     }
+    }
+
+    /* Show/hide password toggle icon */
+    .toggle-password{
+      cursor: pointer;
+      color: #6c757d;
+    }
+
+    [data-bs-theme="dark"] .toggle-password{
+      color: #ced4da;
+    }
+
+    /* Theme toggle mini button (optional) */
+    .theme-toggle{
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 0;
+      background: rgba(255,255,255,.2);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: grid;
+      place-items: center;
+      color: #fff;
+      z-index: var(--toast-z);
+    }
+    [data-bs-theme="dark"] .theme-toggle{
+      background: rgba(33,33,33,.5);
+      color: #ffc107;
+    }
+
+    .small-links{
+      font-size: .85rem;
+      color: rgba(255,255,255,.9);
+    }
+    .small-links a{
+      color: #ffc107;
+      text-decoration: none;
+    }
+
+    /* Footer note */
+    .footer-note{
+      text-align: center;
+      color: rgba(255,255,255,.7);
+      margin-top: 1.25rem;
+      font-size: .8rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Animated gradient blobs -->
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+  <div class="blob blob3"></div>
+
+  <!-- Optional theme toggle for login page -->
+  <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle theme">
+    <i id="themeIcon" class="bi bi-moon-fill"></i>
+  </button>
+
+  <!-- Flash Messages -->
+  <div class="flash-messages">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show d-flex align-items-center mb-2" role="alert">
+            <i class="bi bi-{{ 'check-circle' if category == 'success' else 'exclamation-triangle' }} me-2"></i>
+            <div class="flex-grow-1">{{ message }}</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <!-- Login Wrapper -->
+  <div class="login-wrapper">
+    <div class="card-glass">
+
+      <!-- Header -->
+      <div class="card-header">
+        <div class="brand-circle">
+          <i class="bi bi-mortarboard-fill"></i>
+        </div>
+        <h3 class="card-title mb-0">School Portal</h3>
+        <p class="card-subtitle mb-3">Secure access to your account</p>
+      </div>
+
+      <!-- Body / Form -->
+      <div class="card-body">
+        <form method="POST" action="{{ url_for('login') }}">
+          <!-- Username -->
+          <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+              <input
+                type="text"
+                class="form-control"
+                id="username"
+                name="username"
+                required
+                autocomplete="username"
+                placeholder="Enter your username">
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div class="mb-4">
+          <label for="password" class="form-label">Password</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+              <input
+                type="password"
+                class="form-control"
+                id="password"
+                name="password"
+                required
+                autocomplete="current-password"
+                placeholder="Enter your password">
+              <span class="input-group-text toggle-password" id="togglePassword" title="Show/Hide Password">
+                <i class="bi bi-eye-slash" id="togglePasswordIcon"></i>
+              </span>
+            </div>
+          </div>
+
+          <!-- Submit -->
+          <div class="d-grid mb-2">
+            <button type="submit" class="btn btn-primary btn-lg">
+              <i class="bi bi-box-arrow-in-right"></i> Login
+            </button>
+          </div>
+
+          <!-- Links -->
+          <div class="text-center small text-muted">
+            New here?
+            <a href="{{ url_for('signup') }}">Create account</a>
+            <br>
+            <a href="{{ url_for('contact') }}">Need help?</a>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="text-center admin-link">
+            <a href="{{ url_for('admin_login') }}" class="btn btn-outline-light btn-sm px-3">
+              <i class="bi bi-shield-lock"></i> Admin Login
+            </a>
+          </div>
+        </form>
+      </div>
+
+      <div class="footer-note pb-3">
+        © {{ current_year or '2025' }} GOVT. BOYS HIGH SCHOOL PETH MAKHAMA
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // Flash auto close
+    document.addEventListener('DOMContentLoaded', function () {
+      const alerts = document.querySelectorAll('.flash-messages .alert');
+      alerts.forEach(alert => {
+        setTimeout(() => {
+          const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+          bsAlert.close();
+        }, 5000);
+      });
+    });
+
+    // Show / hide password
+    (function(){
+      const toggle = document.getElementById('togglePassword');
+      const icon = document.getElementById('togglePasswordIcon');
+      const input = document.getElementById('password');
+
+      if(toggle && icon && input){
+        toggle.addEventListener('click', () => {
+          const isPwd = input.getAttribute('type') === 'password';
+          input.setAttribute('type', isPwd ? 'text' : 'password');
+          icon.classList.toggle('bi-eye');
+          icon.classList.toggle('bi-eye-slash');
+        });
+      }
+    })();
+
+    // Dark / light theme toggle (persisted)
+    (function(){
+      const html = document.documentElement;
+      const btn = document.getElementById('themeToggle');
+      const icon = document.getElementById('themeIcon');
+
+      const saved = localStorage.getItem('theme') ||
+        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+      applyTheme(saved);
+
+      btn.addEventListener('click', () => {
+        const current = html.getAttribute('data-bs-theme') || 'light';
+        const next = current === 'dark' ? 'light' : 'dark';
+        applyTheme(next);
+        localStorage.setItem('theme', next);
+      });
+
+      function applyTheme(mode){
+        html.setAttribute('data-bs-theme', mode);
+        if(mode === 'dark'){
+          icon.classList.replace('bi-moon-fill', 'bi-sun-fill');
+        }else{
+          icon.classList.replace('bi-sun-fill', 'bi-moon-fill');
+        }
+      }
+    })();
+  </script>
+</body>
+</html>
