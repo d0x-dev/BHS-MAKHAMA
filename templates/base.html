@@ -25,8 +25,7 @@
       --anim-fast: .18s cubic-bezier(.2,.8,.2,1);
       --anim-mid: .28s cubic-bezier(.2,.8,.2,1);
     }
-
-    [data-bs-theme="dark"]{
+    [data-bs-theme="dark"] {
       --surface: #1e1e1e;
       --text: #f8f9fa;
       --muted: #adb5bd;
@@ -52,14 +51,14 @@
 
     /* SCORE X Animated Logo */
     .app-title {
-      font-size: 1.35rem;
+      font-size: 1.4rem;
       font-weight: 800;
       letter-spacing: 1px;
-      background: linear-gradient(90deg, #fff 0%, #d0e1ff 50%, #fff 100%);
-      background-size: 300% 300%;
+      background: linear-gradient(270deg, #ffffff, #d0e1ff, #ffffff);
+      background-size: 400% 400%;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      animation: shine 3s infinite linear;
+      animation: shine 3s linear infinite;
     }
 
     @keyframes shine {
@@ -93,19 +92,9 @@
       justify-content: center;
       transition: transform .25s;
     }
+    .theme-toggle:active { transform: scale(.92) rotate(8deg); }
 
-    .theme-toggle svg {
-      fill: #ffffff;
-      stroke: #ffffff;
-      width: 26px;
-      height: 26px;
-    }
-
-    .theme-toggle:active {
-      transform: scale(.92) rotate(8deg);
-    }
-
-    /* Profile image */
+    /* profile img */
     .profile-img {
       width: 32px;
       height: 32px;
@@ -113,10 +102,7 @@
       border: 2px solid rgba(255,255,255,0.3);
       transition: border-color 0.2s;
     }
-
-    .profile-img:hover {
-      border-color: rgba(255,255,255,0.6);
-    }
+    .profile-img:hover { border-color: rgba(255,255,255,0.6); }
 
     main.container {
       padding-top: calc(var(--header-h) + .75rem);
@@ -124,161 +110,77 @@
       transition: padding var(--anim-fast);
     }
 
-    /* Dark Mode Fixes */
+    /* Dark mode fixes */
     [data-bs-theme="dark"] body {
       background-color: #121212 !important;
       color: #f1f1f1 !important;
     }
-
-    [data-bs-theme="dark"] .card {
-      background-color: #1e1e1e !important;
-      color: #f1f1f1 !important;
-      border-color: #333 !important;
+    [data-bs-theme="dark"] .bottom-link { color: #bbb; }
+    [data-bs-theme="dark"] .bottom-link.active { color: var(--primary); }
+    [data-bs-theme="dark"] .card { background-color: #1e1e1e !important; color: #f1f1f1 !important; border-color: #333 !important; }
+    [data-bs-theme="dark"] .table { color: #f1f1f1; }
+    [data-bs-theme="dark"] .table thead { color: #f1f1f1; background: #2a2a2a; }
+    [data-bs-theme="dark"] .form-control, [data-bs-theme="dark"] .form-select { background: #1f1f1f; color: #f1f1f1; border-color: #444; }
+    [data-bs-theme="dark"] .form-control:focus, [data-bs-theme="dark"] .form-select:focus {
+      background: #1f1f1f; color: #f1f1f1; border-color: var(--primary); box-shadow: 0 0 0 0.2rem rgba(13,110,253,.15);
     }
 
-    [data-bs-theme="dark"] .table {
-      color: #f1f1f1;
-    }
-
-    [data-bs-theme="dark"] .table thead {
-      color: #f1f1f1;
-      background: #2a2a2a;
-    }
-
-    [data-bs-theme="dark"] .form-control,
-    [data-bs-theme="dark"] .form-select {
-      background: #1f1f1f;
-      color: #f1f1f1;
-      border-color: #444;
-    }
-
-    [data-bs-theme="dark"] .form-control:focus,
-    [data-bs-theme="dark"] .form-select:focus {
-      background: #1f1f1f;
-      color: #f1f1f1;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, .15);
-    }
-
-    [data-bs-theme="dark"] .bg-primary {
-      background-color: #0d6efd !important;
-    }
-
-    [data-bs-theme="dark"] .btn-light {
-      background-color: #f1f1f1 !important;
-      color: #000 !important;
-    }
-
-    /* Flash messages */
+    /* Flash */
     .flash-stack {
-      position: fixed;
-      top: calc(var(--header-h) + .5rem);
-      right: .75rem;
-      left: .75rem;
-      z-index: 1080;
-      display: flex;
-      flex-direction: column;
-      gap: .5rem;
-      pointer-events: none;
+      position: fixed; top: calc(var(--header-h) + .5rem); right: .75rem; left: .75rem;
+      z-index: 1080; display: flex; flex-direction: column; gap: .5rem; pointer-events: none;
     }
+    .flash-stack .alert { pointer-events: auto; box-shadow: var(--shadow); animation: slideDown var(--anim-mid); }
+    @keyframes slideDown { from { opacity:0; transform: translateY(-6px);} to {opacity:1; transform: translateY(0);} }
 
-    .flash-stack .alert {
-      pointer-events: auto;
-      box-shadow: var(--shadow);
-      animation: slideDown var(--anim-mid);
-    }
-
-    @keyframes slideDown {
-      from { opacity: 0; transform: translateY(-6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Bottom Navigation */
+    /* Bottom nav */
     .bottom-nav {
-      position: fixed;
-      inset: auto 0 0 0;
-      height: var(--bottom-h);
-      background: var(--surface);
-      border-top: 1px solid rgba(0,0,0,.06);
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      z-index: 1020;
-      box-shadow: 0 -4px 16px rgba(0,0,0,.03);
-      transition: background var(--anim-mid), border-color var(--anim-mid);
+      position: fixed; inset: auto 0 0 0; height: var(--bottom-h);
+      background: var(--surface); border-top: 1px solid rgba(0,0,0,.06);
+      display: flex; justify-content: space-around; align-items: center; z-index: 1020;
+      box-shadow: 0 -4px 16px rgba(0,0,0,.03); transition: background var(--anim-mid), border-color var(--anim-mid);
     }
-
     [data-bs-theme="dark"] .bottom-nav {
-      border-color: rgba(255,255,255,.06);
-      background: #1a1a1a;
-      box-shadow: 0 -4px 16px rgba(0,0,0,.18);
+      border-color: rgba(255,255,255,.06); background: #1a1a1a; box-shadow: 0 -4px 16px rgba(0,0,0,.18);
     }
-
     .bottom-link {
-      text-decoration: none;
-      color: var(--muted);
-      font-size: .78rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 2px;
-      width: 20%;
-      height: 100%;
-      position: relative;
-      transition: color var(--anim-fast);
+      text-decoration: none; color: var(--muted); font-size: .78rem;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 2px; width: 20%; height: 100%; position: relative; transition: color var(--anim-fast);
     }
-
-    .bottom-link i {
-      font-size: 1.25rem;
-      line-height: 1;
-    }
-
-    .bottom-link.active {
-      color: var(--primary);
-      font-weight: 600;
-    }
-
+    .bottom-link i { font-size: 1.25rem; line-height: 1; }
+    .bottom-link.active { color: var(--primary); font-weight: 600; }
     .bottom-link::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 50%;
-      transform: translateX(-50%) scaleX(0);
-      width: 56%;
-      height: 2px;
-      background: var(--primary);
-      border-radius: 999px;
-      transition: transform var(--anim-fast);
+      content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%) scaleX(0);
+      width: 56%; height: 2px; background: var(--primary); border-radius: 999px; transition: transform var(--anim-fast);
     }
+    .bottom-link.active::after { transform: translateX(-50%) scaleX(1); }
 
-    .bottom-link.active::after {
-      transform: translateX(-50%) scaleX(1);
-    }
-
-    footer {
-      display: none;
-    }
+    footer { display: none; }
   </style>
 
   {% block extra_css %}{% endblock %}
 </head>
 <body class="d-flex flex-column min-vh-100">
 
+  <!-- Sun and Moon Templates -->
+  <template id="sunIcon">
+    <i class="bi bi-brightness-high-fill" style="font-size: 1.4rem; color: #fff;"></i>
+  </template>
+  <template id="moonIcon">
+    <i class="bi bi-moon-fill" style="font-size: 1.4rem; color: #fff;"></i>
+  </template>
+
   <!-- Top App Bar -->
   <div class="app-header">
     <span class="app-title">SCORE X</span>
     <div class="d-flex align-items-center">
-      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
-        <i class="bi bi-brightness-high-fill"></i>
-      </button>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme"></button>
       {% if session.get('logged_in') %}
       <a href="{{ url_for('my_docs') }}" class="ms-2 d-block text-white position-relative" aria-label="Notifications">
         <i class="bi bi-bell-fill"></i>
         {% if session.get('has_unread_docs') %}
-        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-          !
-        </span>
+        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">!</span>
         {% endif %}
       </a>
       <a href="{{ url_for('account') }}" class="ms-2 d-block text-white" aria-label="Account">
@@ -309,30 +211,20 @@
 
   <!-- Bottom Navigation -->
   <nav class="bottom-nav">
-    <a href="{{ url_for('home') }}"
-       class="bottom-link {% if request.endpoint == 'home' %}active{% endif %}">
-      <i class="bi bi-house-door-fill"></i>
-      <span>Home</span>
+    <a href="{{ url_for('home') }}" class="bottom-link {% if request.endpoint == 'home' %}active{% endif %}">
+      <i class="bi bi-house-door-fill"></i> <span>Home</span>
     </a>
-    <a href="{{ url_for('documents') }}"
-       class="bottom-link {% if request.endpoint == 'documents' %}active{% endif %}">
-      <i class="bi bi-file-earmark-text"></i>
-      <span>Docs</span>
+    <a href="{{ url_for('documents') }}" class="bottom-link {% if request.endpoint == 'documents' %}active{% endif %}">
+      <i class="bi bi-file-earmark-text"></i> <span>Docs</span>
     </a>
-    <a href="{{ url_for('notifications') }}"
-       class="bottom-link {% if request.endpoint == 'notifications' %}active{% endif %}">
-      <i class="bi bi-bell-fill"></i>
-      <span>Alerts</span>
+    <a href="{{ url_for('notifications') }}" class="bottom-link {% if request.endpoint == 'notifications' %}active{% endif %}">
+      <i class="bi bi-bell-fill"></i> <span>Alerts</span>
     </a>
-    <a href="{{ url_for('syllabus') }}"
-       class="bottom-link {% if request.endpoint == 'syllabus' %}active{% endif %}">
-      <i class="bi bi-journal-bookmark-fill"></i>
-      <span>Syllabus</span>
+    <a href="{{ url_for('syllabus') }}" class="bottom-link {% if request.endpoint == 'syllabus' %}active{% endif %}">
+      <i class="bi bi-journal-bookmark-fill"></i> <span>Syllabus</span>
     </a>
-    <a href="{{ url_for('about') }}"
-       class="bottom-link {% if request.endpoint == 'about' %}active{% endif %}">
-      <i class="bi bi-info-circle-fill"></i>
-      <span>About</span>
+    <a href="{{ url_for('about') }}" class="bottom-link {% if request.endpoint == 'about' %}active{% endif %}">
+      <i class="bi bi-info-circle-fill"></i> <span>About</span>
     </a>
   </nav>
 
@@ -341,24 +233,25 @@
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       const themeToggle = document.getElementById('themeToggle');
+      const sunT = document.getElementById('sunIcon');
+      const moonT = document.getElementById('moonIcon');
       const html = document.documentElement;
 
-      const savedTheme = localStorage.getItem('theme') ||
+      const saved = localStorage.getItem('theme') ||
         (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 
-      function setIcon(mode) {
+      function setIcon(mode){
         themeToggle.innerHTML = '';
-        const icon = document.createElement('i');
-        icon.className = mode === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
-        themeToggle.appendChild(icon);
+        const tpl = mode === 'dark' ? sunT : moonT;
+        themeToggle.appendChild(tpl.content.cloneNode(true));
       }
 
-      function applyTheme(mode) {
+      function applyTheme(mode){
         html.setAttribute('data-bs-theme', mode);
         setIcon(mode);
       }
 
-      applyTheme(savedTheme);
+      applyTheme(saved);
 
       themeToggle.addEventListener('click', () => {
         const next = html.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
@@ -374,7 +267,6 @@
       }, 4000);
     });
   </script>
-
   {% block extra_js %}{% endblock %}
 </body>
 </html>
