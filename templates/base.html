@@ -62,11 +62,61 @@
       z-index: 1030;
       box-shadow: var(--shadow-strong);
     }
+
+    /* ===== SCORE X animated logo ===== */
     .app-title{
-      font-size: 1.2rem;
-      font-weight: 700;
-      letter-spacing: .2px;
+      display: inline-flex;
+      align-items: center;
+      height: 100%;
     }
+    .scorex-logo{
+      display: inline-flex;
+      align-items: center;
+      gap: 1px;
+      font-weight: 800;
+      font-size: 1.25rem;
+      letter-spacing: .12rem;
+      line-height: 1;
+      background: linear-gradient(90deg,#ffffff,#e6f2ff,#ffffff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      filter: drop-shadow(0 1px 1px rgba(0,0,0,.12));
+      animation: shimmer 3s linear infinite;
+      opacity: 0;
+    }
+    .scorex-logo.animate{
+      animation: shimmer 3s linear infinite, popIn .55s cubic-bezier(.2,.8,.2,1) forwards;
+    }
+    .scorex-logo span{
+      display: inline-block;
+      transform-origin: bottom;
+      opacity: 0;
+    }
+    /* staggered per-letter entrance */
+    .scorex-logo.animate span{
+      animation: letterIn .55s cubic-bezier(.2,.8,.2,1) forwards;
+    }
+    .scorex-logo.animate span:nth-child(1){ animation-delay:.05s; }
+    .scorex-logo.animate span:nth-child(2){ animation-delay:.10s; }
+    .scorex-logo.animate span:nth-child(3){ animation-delay:.15s; }
+    .scorex-logo.animate span:nth-child(4){ animation-delay:.20s; }
+    .scorex-logo.animate span:nth-child(5){ animation-delay:.25s; }
+    .scorex-logo.animate span:nth-child(6){ animation-delay:.30s; }
+
+    @keyframes letterIn{
+      0%{ transform: translateY(40%) rotateX(90deg) scale(.9); opacity:0; }
+      100%{ transform: translateY(0) rotateX(0) scale(1); opacity:1; }
+    }
+    @keyframes popIn{
+      0%{ opacity:0; transform: translateY(4px) scale(.98); }
+      100%{ opacity:1; transform: translateY(0) scale(1); }
+    }
+    @keyframes shimmer{
+      0%{ background-position: -200% 0; }
+      100%{ background-position: 200% 0; }
+    }
+
     .theme-toggle{
       border: none;
       background: transparent;
@@ -260,7 +310,12 @@
 
   <!-- Top App Bar -->
   <div class="app-header">
-    <span class="app-title">BHS MAKHAMA</span>
+    <span class="app-title" aria-label="SCORE X">
+      <!-- Animated SCORE X -->
+      <span id="scorexLogo" class="scorex-logo">
+        <span>S</span><span>C</span><span>O</span><span>R</span><span>E</span><span>X</span>
+      </span>
+    </span>
     <div class="d-flex align-items-center">
       <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme"></button>
       {% if session.get('logged_in') %}
@@ -337,6 +392,13 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
+      // Kickoff the SCOREX logo animation
+      const logo = document.getElementById('scorexLogo');
+      requestAnimationFrame(() => {
+        // next frame ensures layout is ready so transition plays
+        logo.classList.add('animate');
+      });
+
       const themeToggle = document.getElementById('themeToggle');
       const sunT = document.getElementById('sunIcon');
       const moonT = document.getElementById('moonIcon');
