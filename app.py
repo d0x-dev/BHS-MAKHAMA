@@ -1149,41 +1149,50 @@ def upload_classwork():
 def upload_homework():
     if request.method == 'POST':
         try:
+            # Get form data
             class_name = request.form.get('class_name')
             subject = request.form.get('subject')
             title = request.form.get('title')
-            description = request.form.get('description')
+            description = request.form.get('description', '')  # Optional field
             due_date = request.form.get('due_date')
-            file = request.files['file']
-
-            if not all([class_name, subject, title, due_date, file]):
+            file = request.files.get('file')  # Now optional
+            
+            # Validate required fields
+            if not all([class_name, subject, title, due_date]):
                 flash('Please fill all required fields', 'danger')
                 return redirect(url_for('upload_homework'))
 
-            if file and allowed_file(file.filename):
-                filename = secure_filename(f"{class_name}_{subject}_{title}_{file.filename}")
-                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                file.save(file_path)
+            filename = None
+            file_path = None
+            
+            # Process file only if uploaded
+            if file and file.filename != '':
+                if allowed_file(file.filename):
+                    filename = secure_filename(f"{class_name}_{subject}_{title}_{file.filename}")
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    file.save(file_path)
+                else:
+                    flash('Invalid file type. Allowed formats: PDF, DOC, DOCX', 'danger')
+                    return redirect(url_for('upload_homework'))
 
-                conn = get_db_connection()
-                conn.execute(
-                    '''INSERT INTO homework 
-                    (class_name, subject, title, description, filename, upload_date, due_date)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)''',
-                    (class_name, subject, title, description, filename, 
-                     datetime.now().strftime('%Y-%m-%d %H:%M:%S'), due_date)
-                )
-                conn.commit()
-                conn.close()
+            # Save to database
+            conn = get_db_connection()
+            conn.execute(
+                '''INSERT INTO homework 
+                (class_name, subject, title, description, filename, upload_date, due_date)
+                VALUES (?, ?, ?, ?, ?, ?, ?)''',
+                (class_name, subject, title, description, filename, 
+                 datetime.now().strftime('%Y-%m-%d %H:%M:%S'), due_date)
+            )
+            conn.commit()
+            conn.close()
 
-                flash('Homework uploaded successfully!', 'success')
-                return redirect(url_for('upload_homework'))  # Stay on same page after success
-            else:
-                flash('Invalid file type. Allowed formats: PDF, DOC, DOCX', 'danger')
-                return redirect(url_for('upload_homework'))
+            flash('Homework created successfully!', 'success')
+            return redirect(url_for('upload_homework'))
+            
         except Exception as e:
-            print(f"Error uploading homework: {e}")
-            flash(f'An error occurred while uploading homework: {str(e)}', 'danger')
+            print(f"Error creating homework: {e}")
+            flash(f'An error occurred: {str(e)}', 'danger')
             return redirect(url_for('upload_homework'))
 
     return render_template('admin/upload_homework.html')
