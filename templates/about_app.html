@@ -11,6 +11,8 @@
     max-width: 780px;
     margin: 0 auto;
     padding-bottom: calc(var(--bottom-h) + 32px);
+    -webkit-user-select: none;
+    user-select: none;
   }
 
   .about-card {
@@ -81,12 +83,37 @@
     opacity: 1;
     transform: translateY(0);
   }
+
+  /* Version History */
+  .version-item {
+    padding: 0.8rem 0;
+    border-bottom: 1px dashed rgba(0,0,0,0.1);
+  }
+  [data-bs-theme="dark"] .version-item {
+    border-bottom: 1px dashed rgba(255,255,255,0.1);
+  }
+  .version-item:last-child {
+    border-bottom: none;
+  }
+  .version-date {
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  .version-features {
+    margin-top: 0.5rem;
+    padding-left: 1.2rem;
+  }
+  .version-features li {
+    padding: 0.2rem 0;
+    font-size: 0.9rem;
+  }
 </style>
 
 <div class="about-wrapper">
   <div class="about-card reveal">
-    <h4 class="mb-3"><i class="bi bi-info-circle me-2"></i>About App</h4>
-    <p>Welcome to <strong>School Management System</strong>, a modern Android-inspired platform designed to make learning and administration smooth and efficient for students, teachers, and staff.</p>
+    <h4 class="mb-3"><i class="bi bi-info-circle me-2"></i>About PM SHREE BHS App</h4>
+    <p>Welcome to <strong>PM SHREE BHS School Management System</strong>, our modern Android platform designed to make learning and administration smooth and efficient for students, teachers, and staff.</p>
+    <p class="mt-2">Now with document requests, exam results viewing, and improved performance in version 2.0!</p>
   </div>
 
   <div class="about-card reveal">
@@ -94,11 +121,11 @@
     <table class="app-info-table">
       <tr>
         <th>App Name</th>
-        <td>School Management System</td>
+        <td>PM SHREE BHS School System</td>
       </tr>
       <tr>
         <th>Version</th>
-        <td>1.0.0</td>
+        <td>2.0.0</td>
       </tr>
       <tr>
         <th>SDK</th>
@@ -106,7 +133,11 @@
       </tr>
       <tr>
         <th>Build</th>
-        <td>2025.07.24-release</td>
+        <td>2025.07.27-release</td>
+      </tr>
+      <tr>
+        <th>Package</th>
+        <td>com.pmshree.bhs</td>
       </tr>
       <tr>
         <th>Developers</th>
@@ -125,6 +156,8 @@
       <li><i class="bi bi-house-door"></i> Personalized Student Dashboard</li>
       <li><i class="bi bi-journal-check"></i> Classwork & Homework Management</li>
       <li><i class="bi bi-file-earmark-text"></i> Document & Book Sharing</li>
+      <li><i class="bi bi-file-earmark-arrow-down"></i> Document Request System</li>
+      <li><i class="bi bi-graph-up"></i> Exam Results & Reports</li>
       <li><i class="bi bi-bell"></i> Real-time Notification Alerts</li>
       <li><i class="bi bi-journal-bookmark"></i> Syllabus & Curriculum Updates</li>
       <li><i class="bi bi-moon-stars"></i> Light & Dark Theme Support</li>
@@ -132,12 +165,50 @@
   </div>
 
   <div class="about-card reveal">
+    <h5><i class="bi bi-clock-history me-2"></i>Version History</h5>
+    
+    <div class="version-item">
+      <div class="d-flex justify-content-between align-items-center">
+        <strong>v2.0.0</strong>
+        <span class="version-date">27 Jul 2025</span>
+      </div>
+      <ul class="version-features">
+        <li>New name: PM SHREE BHS</li>
+        <li>Added document request system</li>
+        <li>Added exam results viewing</li>
+        <li>Improved performance and stability</li>
+        <li>New UI improvements</li>
+      </ul>
+    </div>
+    
+    <div class="version-item">
+      <div class="d-flex justify-content-between align-items-center">
+        <strong>v1.0.0</strong>
+        <span class="version-date">24 Jul 2025</span>
+      </div>
+      <ul class="version-features">
+        <li>Initial release as ScoreX</li>
+        <li>Dashboard, Homework, Books, Syllabus</li>
+        <li>Notifications system</li>
+        <li>Dark/Light theme support</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="about-card reveal">
     <h5><i class="bi bi-people-fill me-2"></i>Our Mission</h5>
     <p>We aim to digitalize our school management system, giving students and staff easy access to all academic resources, notifications, and updates with a single click.</p>
+    <p class="mt-2">Our app now helps students request documents and view their exam results directly from their smartphones.</p>
   </div>
 </div>
 
 <script>
+  // Prevent zooming
+  document.addEventListener('gesturestart', function(e) {
+    e.preventDefault();
+  });
+
+  // Reveal animation
   document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.reveal').forEach((el, i) => {
       setTimeout(() => el.classList.add('show'), i * 150);
