@@ -1110,33 +1110,52 @@ def upload_classwork():
             title = request.form.get('title')
             description = request.form.get('description')
             due_date = request.form.get('due_date')
-            file = request.files['file']
+            file = request.files.get('file')  # Now optional
 
-            if not all([class_name, subject, title, file]):
+            if not all([class_name, subject, title]):
                 flash('Please fill all required fields', 'danger')
                 return redirect(url_for('upload_classwork'))
 
-            if file and allowed_file(file.filename):
-                filename = secure_filename(f"{class_name}_{subject}_{title}_{file.filename}")
-                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                file.save(file_path)
-
-                conn = get_db_connection()
-                conn.execute(
-                    '''INSERT INTO classwork 
-                    (class_name, subject, title, description, filename, upload_date, due_date)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)''',
-                    (class_name, subject, title, description, filename, 
-                     datetime.now().strftime('%Y-%m-%d %H:%M:%S'), due_date)
-                )
-                conn.commit()
-                conn.close()
-
-                flash('Class work uploaded successfully!', 'success')
-                return redirect(url_for('upload_classwork'))  # Stay on same page after success
+            filename = None
+            
+            # Process file if uploaded
+            if file and file.filename != '':
+                if allowed_file(file.filename, allowed_extensions=['pdf', 'doc', 'docx', 'ppt', 'pptx']):
+                    filename = secure_filename(f"{class_name}_{subject}_{title}_{file.filename}")
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    file.save(file_path)
+                else:
+                    flash('Invalid file type. Allowed formats: PDF, DOC, DOCX, PPT, PPTX', 'danger')
+                    return redirect(url_for('upload_classwork'))
             else:
-                flash('Invalid file type. Allowed formats: PDF, DOC, DOCX, PPT, PPTX', 'danger')
-                return redirect(url_for('upload_classwork'))
+                # Use default sample.pdf if no file uploaded
+                sample_path = os.path.join(os.path.dirname(__file__), 'sample.pdf')
+                if os.path.exists(sample_path):
+                    filename = secure_filename(f"{class_name}_{subject}_{title}_sample.pdf")
+                    dest_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    
+                    # Copy sample file to upload folder
+                    import shutil
+                    shutil.copyfile(sample_path, dest_path)
+                else:
+                    flash('No file uploaded and sample file not found', 'danger')
+                    return redirect(url_for('upload_classwork'))
+
+            # Save to database
+            conn = get_db_connection()
+            conn.execute(
+                '''INSERT INTO classwork 
+                (class_name, subject, title, description, filename, upload_date, due_date)
+                VALUES (?, ?, ?, ?, ?, ?, ?)''',
+                (class_name, subject, title, description, filename, 
+                 datetime.now().strftime('%Y-%m-%d %H:%M:%S'), due_date)
+            )
+            conn.commit()
+            conn.close()
+
+            flash('Class work uploaded successfully!', 'success')
+            return redirect(url_for('upload_classwork'))
+            
         except Exception as e:
             print(f"Error uploading class work: {e}")
             flash(f'An error occurred while uploading class work: {str(e)}', 'danger')
@@ -1163,9 +1182,8 @@ def upload_homework():
                 return redirect(url_for('upload_homework'))
 
             filename = None
-            file_path = None
             
-            # Process file only if uploaded
+            # Process file if uploaded
             if file and file.filename != '':
                 if allowed_file(file.filename):
                     filename = secure_filename(f"{class_name}_{subject}_{title}_{file.filename}")
@@ -1173,6 +1191,19 @@ def upload_homework():
                     file.save(file_path)
                 else:
                     flash('Invalid file type. Allowed formats: PDF, DOC, DOCX', 'danger')
+                    return redirect(url_for('upload_homework'))
+            else:
+                # Use default sample.pdf if no file uploaded
+                sample_path = os.path.join(os.path.dirname(__file__), 'sample.pdf')
+                if os.path.exists(sample_path):
+                    filename = secure_filename(f"{class_name}_{subject}_{title}_sample.pdf")
+                    dest_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    
+                    # Copy sample file to upload folder
+                    import shutil
+                    shutil.copyfile(sample_path, dest_path)
+                else:
+                    flash('No file uploaded and sample file not found', 'danger')
                     return redirect(url_for('upload_homework'))
 
             # Save to database
