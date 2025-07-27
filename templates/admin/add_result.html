@@ -6,10 +6,18 @@
 {% block content %}
 <style>
   :root {
+    --primary: #0d6efd;
+    --primary-gradient: linear-gradient(135deg,#0d6efd,#5b8cff);
     --soft-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
     --btn-green: #2ecc71;
     --btn-green-hover: #27ae60;
     --btn-secondary-hover: #d1d1d1;
+    --admin-bottom-h: 64px;
+    --ripple-color: rgba(255,255,255,.35);
+  }
+
+  .admin-page-wrap {
+    padding-bottom: calc(var(--admin-bottom-h) + 20px);
   }
 
   .page-title {
@@ -60,23 +68,68 @@
     font-size: 0.95rem;
     transition: background 0.2s ease, transform 0.15s ease;
   }
-  .btn-back:hover {
-    background: var(--btn-secondary-hover);
-  }
+  .btn-back:hover { background: var(--btn-secondary-hover); }
 
-  #bottomMenu {
-    background-color: var(--bs-body-bg);
+  /* ================= Bottom Animated Admin Menu ================= */
+  #adminBottom {
+    position: fixed;
+    inset: auto 0 0 0;
+    height: var(--admin-bottom-h);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: var(--bs-body-bg);
     border-top: 1px solid var(--bs-border-color);
+    z-index: 1040;
+    backdrop-filter: blur(6px);
   }
-  .nav-link {
-    font-size: 0.8rem;
-    color: var(--bs-body-color);
-  }
-  body.dark-mode #bottomMenu {
+  body.dark-mode #adminBottom {
     background-color: #1a1a1a;
     border-top: 1px solid #333;
   }
-  body.dark-mode .nav-link { color: #eee; }
+  .admin-link {
+    text-decoration: none;
+    font-size: 0.8rem;
+    color: var(--bs-body-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    width: 33.33%;
+    height: 100%;
+    position: relative;
+    transition: color .18s ease;
+  }
+  body.dark-mode .admin-link { color: #eee; }
+  .admin-link i { font-size: 1.25rem; }
+  .admin-link.active { color: var(--primary); font-weight: 600; }
+  .admin-link::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%) scaleX(0);
+    width: 50%;
+    height: 2px;
+    background: var(--primary);
+    border-radius: 999px;
+    transition: transform .2s ease;
+  }
+  .admin-link.active::after { transform: translateX(-50%) scaleX(1); }
+
+  .ripple {
+    position: relative;
+    overflow: hidden;
+  }
+  .ripple span.r-ink {
+    position: absolute;
+    border-radius: 50%;
+    transform: scale(0);
+    animation: ripple .6s linear;
+    background-color: var(--ripple-color);
+  }
+  @keyframes ripple { to { transform: scale(4); opacity: 0; } }
 
   @keyframes fadeInDown {
     from {opacity: 0; transform: translateY(-10px);}
@@ -88,7 +141,7 @@
   }
 </style>
 
-<div class="container mt-3 mb-5">
+<div class="admin-page-wrap container mt-3 mb-5">
   <h2 class="page-title">Create New Exam</h2>
 
   <div class="card">
@@ -114,10 +167,10 @@
         </div>
         
         <div class="d-grid gap-2">
-          <button type="submit" class="btn-submit">
+          <button type="submit" class="btn-submit ripple">
             <i class="bi bi-save"></i> Create Exam
           </button>
-          <a href="{{ url_for('admin_results') }}" class="btn btn-outline-secondary btn-back">
+          <a href="{{ url_for('admin_results') }}" class="btn btn-outline-secondary btn-back ripple">
             <i class="bi bi-arrow-left"></i> Back to Results
           </a>
         </div>
@@ -127,17 +180,33 @@
 </div>
 
 <!-- Bottom Menu -->
-<nav class="navbar navbar-expand fixed-bottom shadow-sm" id="bottomMenu">
-  <div class="container justify-content-around">
-    <a class="nav-link text-center" href="{{ url_for('admin_dashboard') }}">
-      <i class="bi bi-speedometer2"></i><br>Dashboard
-    </a>
-    <a class="nav-link text-center active" href="{{ url_for('admin_results') }}">
-      <i class="bi bi-clipboard-data"></i><br>Results
-    </a>
-    <a class="nav-link text-center" href="{{ url_for('admin_logout') }}">
-      <i class="bi bi-box-arrow-right"></i><br>Logout
-    </a>
-  </div>
+<nav id="adminBottom">
+  <a class="admin-link ripple" href="{{ url_for('admin_dashboard') }}">
+    <i class="bi bi-speedometer2"></i>
+    <span>Dashboard</span>
+  </a>
+  <a class="admin-link ripple active" href="{{ url_for('admin_results') }}">
+    <i class="bi bi-clipboard-data"></i>
+    <span>Results</span>
+  </a>
+  <a class="admin-link ripple" href="{{ url_for('admin_logout') }}">
+    <i class="bi bi-box-arrow-right"></i>
+    <span>Logout</span>
+  </a>
 </nav>
+
+<script>
+document.addEventListener('click', function(e){
+  const target = e.target.closest('.ripple');
+  if(!target) return;
+  const rect = target.getBoundingClientRect();
+  const ink = document.createElement('span');
+  ink.classList.add('r-ink');
+  ink.style.left = (e.clientX - rect.left) + 'px';
+  ink.style.top  = (e.clientY - rect.top)  + 'px';
+  ink.style.width = ink.style.height = Math.max(rect.width, rect.height) + 'px';
+  target.appendChild(ink);
+  setTimeout(()=> ink.remove(), 600);
+}, false);
+</script>
 {% endblock %}
