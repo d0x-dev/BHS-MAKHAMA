@@ -63,58 +63,87 @@
       box-shadow: var(--shadow-strong);
     }
 
-    /* SCORE X animated logo */
-    .scorex-logo {
+    /* PM SHREE BHS animated logo */
+    .pmshree-logo {
       display: inline-flex;
       align-items: center;
-      gap: 1px;
+      gap: 2px;
       font-weight: 800;
       font-size: 1.25rem;
-      letter-spacing: .12rem;
+      letter-spacing: .05rem;
       line-height: 1;
       color: #fff;
-      opacity: 0;
       position: relative;
+      overflow: hidden;
+      padding: 0 4px;
     }
-    .scorex-logo.animate {
-      opacity: 1;
-      animation: popIn .55s cubic-bezier(.2,.8,.2,1) forwards;
-    }
-    .scorex-logo.animate span {
+    .pmshree-logo span {
       display: inline-block;
-      animation: letterIn .55s cubic-bezier(.2,.8,.2,1) forwards;
+      opacity: 0;
+      transform: translateY(100%) rotateX(-90deg);
+      transform-origin: bottom center;
     }
-    .scorex-logo.animate span:nth-child(1){ animation-delay:.05s; }
-    .scorex-logo.animate span:nth-child(2){ animation-delay:.10s; }
-    .scorex-logo.animate span:nth-child(3){ animation-delay:.15s; }
-    .scorex-logo.animate span:nth-child(4){ animation-delay:.20s; }
-    .scorex-logo.animate span:nth-child(5){ animation-delay:.25s; }
-    .scorex-logo.animate span:nth-child(6){ animation-delay:.30s; }
+    .pmshree-logo.animate span {
+      animation: letterRise 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    .pmshree-logo.animate span:nth-child(1) { animation-delay: 0.1s; }
+    .pmshree-logo.animate span:nth-child(2) { animation-delay: 0.2s; }
+    .pmshree-logo.animate span:nth-child(3) { animation-delay: 0.3s; }
+    .pmshree-logo.animate span:nth-child(4) { animation-delay: 0.4s; }
+    .pmshree-logo.animate span:nth-child(5) { animation-delay: 0.5s; }
+    .pmshree-logo.animate span:nth-child(6) { animation-delay: 0.6s; }
+    .pmshree-logo.animate span:nth-child(7) { animation-delay: 0.7s; }
+    .pmshree-logo.animate span:nth-child(8) { animation-delay: 0.8s; }
+    .pmshree-logo.animate span:nth-child(9) { animation-delay: 0.9s; }
 
-    @keyframes letterIn {
-      0%{ transform: translateY(40%) rotateX(90deg) scale(.9); opacity:0; }
-      100%{ transform: translateY(0) rotateX(0) scale(1); opacity:1; }
-    }
-    @keyframes popIn {
-      0%{ opacity:0; transform: translateY(4px) scale(.98); }
-      100%{ opacity:1; transform: translateY(0) scale(1); }
+    @keyframes letterRise {
+      0% {
+        opacity: 0;
+        transform: translateY(100%) rotateX(-90deg);
+        text-shadow: 0 0 10px rgba(255,255,255,0.5);
+      }
+      70% {
+        opacity: 1;
+        transform: translateY(-10%) rotateX(20deg);
+        text-shadow: 0 5px 15px rgba(255,255,255,0.8);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) rotateX(0);
+        text-shadow: 0 2px 5px rgba(255,255,255,0.3);
+      }
     }
 
-    /* Shine effect */
-    .scorex-logo.animate::after {
+    /* Wave effect after animation completes */
+    .pmshree-logo.animate::after {
       content: '';
       position: absolute;
       top: 0;
-      left: -50%;
-      width: 50%;
+      left: 0;
+      width: 100%;
       height: 100%;
-      background: linear-gradient(120deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.1) 100%);
-      transform: skewX(-25deg);
-      animation: shine 1.5s ease-in-out 0.8s forwards;
+      background: linear-gradient(90deg, 
+        rgba(255,255,255,0) 0%,
+        rgba(255,255,255,0.3) 50%,
+        rgba(255,255,255,0) 100%);
+      transform: translateX(-100%);
+      animation: waveShine 1.5s ease-in-out 1.2s forwards;
     }
-    @keyframes shine {
-      0% { left: -50%; }
-      100% { left: 120%; }
+
+    @keyframes waveShine {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    /* Glow pulse effect */
+    @keyframes glowPulse {
+      0%, 100% { text-shadow: 0 0 5px rgba(255,255,255,0.3); }
+      50% { text-shadow: 0 0 15px rgba(255,255,255,0.7); }
+    }
+
+    .pmshree-logo.animate span:nth-child(1),
+    .pmshree-logo.animate span:nth-child(9) {
+      animation: glowPulse 2s ease-in-out infinite 1.5s;
     }
 
     .theme-toggle {
@@ -303,8 +332,8 @@
 
   <!-- Top App Bar -->
   <div class="app-header">
-    <span class="scorex-logo" id="scorexLogo">
-      <span>S</span><span>C</span><span>O</span><span>R</span><span>E</span><span>X</span>
+    <span class="pmshree-logo" id="pmshreeLogo">
+      <span>P</span><span>M</span><span> </span><span>S</span><span>H</span><span>R</span><span>E</span><span>E</span><span> </span><span>B</span><span>H</span><span>S</span>
     </span>
     <div class="d-flex align-items-center">
       <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme"></button>
@@ -364,7 +393,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      const logo = document.getElementById('scorexLogo');
+      const logo = document.getElementById('pmshreeLogo');
       setTimeout(() => logo.classList.add('animate'), 100);
 
       const themeToggle = document.getElementById('themeToggle');
