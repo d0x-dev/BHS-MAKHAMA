@@ -235,6 +235,12 @@ def record_user_session(username, session_token, ip_address):
     finally:
         conn.close()
 
+def get_current_user():
+    """Get the currently logged in user"""
+    if 'user' in session:
+        return session['user']
+    return None
+
 def validate_user_session(username, session_token):
     conn = get_db_connection()
     try:
@@ -314,7 +320,6 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if session.get('logged_in'):
-        # Check if session is still valid
         if validate_user_session(session['username'], session.get('session_token', '')):
             return redirect(url_for('home'))
         else:
@@ -325,7 +330,7 @@ def login():
         password = request.form.get('password')
         ip_address = request.remote_addr
 
-        # First check if it's an admin login
+        # Admin login check
         conn = get_db_connection()
         admin = conn.execute('SELECT * FROM admin WHERE username = ?', (username,)).fetchone()
         conn.close()
@@ -335,7 +340,7 @@ def login():
             session['admin_username'] = username
             return redirect(url_for('admin_dashboard'))
         
-        # If not admin, proceed with regular user login
+        # Regular user login
         if is_blocked(username, ip_address):
             flash('Too many failed attempts. Please try again after 24 hours.', 'danger')
             return redirect(url_for('login'))
@@ -358,15 +363,15 @@ def login():
                 attempts_data[ip_address]['attempts'] = 0
             save_failed_attempts(attempts_data)
 
-            # Create new session
+            # Create new session with roll number
             session_token = secrets.token_hex(16)
             session['logged_in'] = True
             session['username'] = username
             session['role'] = user.get('role', 'student')
+            session['roll_number'] = user.get('roll_number', '')  # Store roll number
             session['session_token'] = session_token
             session['ip_address'] = ip_address
             
-            # Record session in database
             record_user_session(username, session_token, ip_address)
             
             flash('Login successful!', 'success')
@@ -608,6 +613,246 @@ def add_result():
     
     return render_template('admin/add_result.html')
 
+def generate_pdf(exam, student):
+    """Generate PDF marksheet using WeasyPrint - same for both admin and student"""
+    from jinja2 import Template
+    from weasyprint import HTML
+    from io import BytesIO
+    
+    PDF_TEMPLATE = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .school-name { font-size: 18px; font-weight: bold; }
+        .title { font-size: 14px; margin: 5px 0; }
+        .student-info { margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #f2f2f2; }
+        .signature { margin-top: 30px; text-align: right; }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <div class="school-name">GOVT. BOYS HIGH SCHOOL MAKHAMA</div>
+        <div class="title">Official Marksheet (Academic Year 2023-2024)</div>
+      </div>
+      
+      <div class="student-info">
+        <p><strong>Name:</strong> {{ student.name }} &nbsp;&nbsp; 
+           <strong>Roll No:</strong> {{ student.roll_number }} &nbsp;&nbsp;
+           <strong>Class:</strong> {{ exam.class }}</p>
+        <p><strong>Exam:</strong> {{ exam.exam_name }} &nbsp;&nbsp;
+           <strong>Date:</strong> {{ exam.exam_date }} &nbsp;&nbsp;
+           <strong>Percentage:</strong> {{ "%.2f"|format(student.percentage) }}%</p>
+      </div>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>Subject</th>
+            <th>Marks Obtained</th>
+            <th>Max Marks</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for subject in student.subjects %}
+          <tr>
+            <td>{{ subject.subject }}</td>
+            <td>{{ subject.marks_obtained }}</td>
+            <td>{{ subject.total_marks }}</td>
+          </tr>
+          {% endfor %}
+          <tr style="font-weight: bold;">
+            <td>Total</td>
+            <td>{{ student.total_obtained }}</td>
+            <td>{{ student.total_max }}</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div class="signature">
+        <div style="width: 200px; border-top: 1px solid #000; margin-left: auto; padding-top: 5px;">
+          Principal
+        </div>
+      </div>
+      
+      <div style="text-align: center; font-size: 12px; margin-top: 20px;">
+        This is a computer-generated document and does not require a physical signature.
+      </div>
+    </body>
+    </html>
+    """
+    
+    template = Template(PDF_TEMPLATE)
+    html = template.render(exam=exam, student=student)
+    
+    # Generate PDF
+    pdf_file = BytesIO()
+    HTML(string=html).write_pdf(pdf_file)
+    pdf_file.seek(0)
+    
+    return pdf_file
+
+from flask import make_response
+from weasyprint import HTML
+from io import BytesIO
+import tempfile
+import os
+
+PDF_TEMPLATE = """
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <style>
+    body {
+      font-family: 'Times New Roman', serif;
+      margin: 0;
+      padding: 0;
+      background: white;
+      color: #000;
+      font-size: 13px;
+    }
+    .marksheet {
+      max-width: 850px;
+      margin: 0 auto;
+      padding: 30px 40px;
+      border: 1px solid #000;
+    }
+    .header {
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .sub-header {
+      text-align: center;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+    .info-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 15px;
+    }
+    .info-table td {
+      padding: 6px;
+      vertical-align: top;
+    }
+    table.subjects {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      margin-bottom: 20px;
+      font-size: 13px;
+    }
+    table.subjects th, table.subjects td {
+      border: 1px solid #000;
+      padding: 5px;
+      text-align: center;
+    }
+    table.subjects th {
+      background: #f3f3f3;
+      font-weight: bold;
+    }
+    .footer {
+      margin-top: 40px;
+      text-align: center;
+      font-size: 12px;
+    }
+    .signature {
+      margin-top: 40px;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 40px;
+    }
+    .signature div {
+      text-align: center;
+      font-size: 14px;
+      border-top: 1px solid #000;
+      width: 200px;
+      padding-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="marksheet">
+    <div class="header">GOVT. BOYS HIGH SCHOOL MAKHAMA</div>
+    <div class="sub-header">Official Marksheet (Academic Year 2023-2024)</div>
+
+    <table class="info-table">
+      <tr>
+        <td><b>Name:</b> {{ student.name }}</td>
+        <td><b>Roll No:</b> {{ student.roll_number }}</td>
+        <td><b>Class:</b> {{ exam.class }}</td>
+      </tr>
+      <tr>
+        <td><b>Exam:</b> {{ exam.exam_name }}</td>
+        <td><b>Exam Date:</b> {{ exam.exam_date }}</td>
+        <td><b>Percentage:</b> {{ "%.2f"|format(student.percentage) }}%</td>
+      </tr>
+    </table>
+
+    <table class="subjects">
+      <thead>
+        <tr>
+          <th>Subject</th>
+          <th>Internal</th>
+          <th>Theory</th>
+          <th>Practical</th>
+          <th>Total</th>
+          <th>Max Marks</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sub in student.subjects %}
+        <tr>
+          <td>{{ sub.subject }}</td>
+          <td>{{ sub.internal if sub.get('internal') else '-' }}</td>
+          <td>{{ sub.theory if sub.get('theory') else '-' }}</td>
+          <td>{{ sub.practical if sub.get('practical') else '-' }}</td>
+          <td>{{ sub.marks_obtained }}</td>
+          <td>{{ sub.total_marks }}</td>
+        </tr>
+        {% endfor %}
+        <tr>
+          <th colspan="4">Total</th>
+          <th>{{ student.total_obtained }}</th>
+          <th>{{ student.total_max }}</th>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="signature">
+      <div>Seal / Stamp</div>
+      <div>Principal</div>
+    </div>
+
+    <div class="footer">
+      Any discrepancy should be reported within 7 days.
+    </div>
+  </div>
+</body>
+</html>
+"""
+
+def generate_pdf(exam, student):
+    """Generate PDF marksheet for a student"""
+    from jinja2 import Template
+    template = Template(PDF_TEMPLATE)
+    html = template.render(exam=exam, student=student)
+    
+    # Generate PDF
+    pdf_file = BytesIO()
+    HTML(string=html).write_pdf(pdf_file)
+    pdf_file.seek(0)
+    
+    return pdf_file
+
 @app.route('/admin/add_student/<exam_id>', methods=['GET', 'POST'])
 @admin_required
 def add_student(exam_id):
@@ -652,24 +897,102 @@ def add_student(exam_id):
         total_max = sum(sub['total_marks'] for sub in subjects)
         percentage = (total_obtained / total_max * 100) if total_max > 0 else 0
         
-        # Add student to exam
-        exam['students'].append({
+        # Create student data
+        student_data = {
             'name': name,
             'roll_number': roll_number,
             'subjects': subjects,
             'total_obtained': total_obtained,
             'total_max': total_max,
             'percentage': round(percentage, 2)
-        })
+        }
+        
+        # Add student to exam
+        exam['students'].append(student_data)
         
         # Save updated results
         with open(RESULTS_FILE, 'w') as f:
             json.dump(results_data, f, indent=2)
             
+        # Generate PDF with blank theory column
+        pdf_student_data = {
+            'name': name,
+            'roll_number': roll_number,
+            'subjects': [{
+                'subject': sub['subject'],
+                'internal': '-',  # Show dash
+                'theory': '-',    # Leave blank (show dash)
+                'practical': '-', # Show dash
+                'marks_obtained': sub['marks_obtained'],
+                'total_marks': sub['total_marks']
+            } for sub in subjects],
+            'total_obtained': total_obtained,
+            'total_max': total_max,
+            'percentage': round(percentage, 2)
+        }
+        
+        pdf_file = generate_pdf(exam, pdf_student_data)
+        
+        # Save PDF temporarily
+        temp_dir = os.path.join(app.root_path, 'static', 'temp_pdfs')
+        os.makedirs(temp_dir, exist_ok=True)
+        pdf_filename = f"marksheet_{exam_id}_{roll_number}.pdf"
+        pdf_path = os.path.join(temp_dir, pdf_filename)
+        
+        with open(pdf_path, 'wb') as f:
+            f.write(pdf_file.getbuffer())
+            
+        pdf_url = url_for('static', filename=f'temp_pdfs/{pdf_filename}', _external=True)
+        
         flash('Student added successfully!', 'success')
-        return redirect(url_for('add_student', exam_id=exam_id))
+        return render_template('admin/add_student.html', exam=exam, pdf_url=pdf_url)
     
     return render_template('admin/add_student.html', exam=exam)
+
+@app.route('/download_marksheet/<exam_id>/<roll_number>')
+@admin_required
+def download_marksheet(exam_id, roll_number):
+    try:
+        with open(RESULTS_FILE, 'r') as f:
+            results_data = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        flash('Results data not found', 'danger')
+        return redirect(url_for('admin_results'))
+    
+    exam = next((e for e in results_data if e['id'] == exam_id), None)
+    if not exam:
+        flash('Exam not found', 'danger')
+        return redirect(url_for('admin_results'))
+    
+    student = next((s for s in exam['students'] if s['roll_number'] == roll_number), None)
+    if not student:
+        flash('Student not found', 'danger')
+        return redirect(url_for('admin_results'))
+    
+    # Prepare PDF data with blank theory column
+    pdf_student_data = {
+        'name': student['name'],
+        'roll_number': student['roll_number'],
+        'subjects': [{
+            'subject': sub['subject'],
+            'internal': '-',
+            'theory': '-',  # Leave blank
+            'practical': '-',
+            'marks_obtained': sub['marks_obtained'],
+            'total_marks': sub['total_marks']
+        } for sub in student['subjects']],
+        'total_obtained': student['total_obtained'],
+        'total_max': student['total_max'],
+        'percentage': student['percentage']
+    }
+    
+    pdf_file = generate_pdf(exam, pdf_student_data)
+    
+    response = make_response(pdf_file.getvalue())
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f'attachment; filename=marksheet_{roll_number}.pdf'
+    
+    return response
 
 @app.route('/results', methods=['GET', 'POST'])
 @login_required
@@ -702,6 +1025,43 @@ def results():
                 flash('Invalid exam selected', 'danger')
     
     return render_template('results.html', results=results_data)
+
+@app.route('/student/download_marksheet/<exam_id>/<roll_number>')
+@login_required
+def student_download_marksheet(exam_id, roll_number):
+    try:
+        # Load results data
+        with open(RESULTS_FILE, 'r') as f:
+            results_data = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        flash('Results data not found', 'danger')
+        return redirect(url_for('results'))
+    
+    exam = next((e for e in results_data if e['id'] == exam_id), None)
+    if not exam:
+        flash('Exam not found', 'danger')
+        return redirect(url_for('results'))
+    
+    student = next((s for s in exam['students'] if str(s['roll_number']) == str(roll_number)), None)
+    if not student:
+        flash('Student not found', 'danger')
+        return redirect(url_for('results'))
+
+    try:
+        # Generate PDF
+        pdf_file = generate_pdf(exam, student)
+        
+        # Create response with download headers
+        response = make_response(pdf_file.getvalue())
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = f'attachment; filename=marksheet_{roll_number}.pdf'
+        
+        return response
+        
+    except Exception as e:
+        print(f"Error generating PDF: {str(e)}")
+        flash('Error generating marksheet', 'danger')
+        return redirect(url_for('results'))
 
 @app.route('/admin/doc_requests')
 @admin_required
