@@ -11,6 +11,7 @@
     --btn-blue-hover: #0b5ed7;
     --btn-green: #2ecc71;
     --btn-green-hover: #27ae60;
+    --menu-active: #0d6efd;
   }
 
   .page-header {
@@ -107,20 +108,46 @@
     color: #6c757d;
   }
 
-  /* Bottom menu like dashboard */
+  /* Bottom Animated Menu (Dashboard style) */
   #bottomMenu {
-    background-color: var(--bs-body-bg);
-    border-top: 1px solid var(--bs-border-color);
+    background: #fff;
+    border-top: 1px solid #ddd;
+    display: flex;
+    justify-content: space-around;
+    padding: 6px 0;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    z-index: 999;
   }
-  .nav-link {
+  #bottomMenu a {
+    text-decoration: none;
+    color: #777;
+    text-align: center;
     font-size: 0.8rem;
-    color: var(--bs-body-color);
+    flex: 1;
+    transition: color 0.3s, transform 0.2s;
   }
+  #bottomMenu a.active {
+    color: var(--menu-active);
+    transform: scale(1.1);
+  }
+  #bottomMenu a i {
+    display: block;
+    font-size: 1.3rem;
+    margin-bottom: 2px;
+  }
+
   body.dark-mode #bottomMenu {
-    background-color: #1a1a1a;
+    background: #1a1a1a;
     border-top: 1px solid #333;
   }
-  body.dark-mode .nav-link { color: #eee; }
+  body.dark-mode #bottomMenu a {
+    color: #ccc;
+  }
+  body.dark-mode #bottomMenu a.active {
+    color: #0d6efd;
+  }
 
   @keyframes fadeInDown {
     from {opacity: 0; transform: translateY(-10px);}
@@ -185,18 +212,19 @@
   {% endif %}
 </div>
 
-<!-- Bottom Menu -->
-<nav class="navbar navbar-expand fixed-bottom shadow-sm" id="bottomMenu">
-  <div class="container justify-content-around">
-    <a class="nav-link text-center" href="{{ url_for('admin_dashboard') }}">
-      <i class="bi bi-speedometer2"></i><br>Dashboard
-    </a>
-    <a class="nav-link text-center active" href="{{ url_for('admin_results') }}">
-      <i class="bi bi-clipboard-data"></i><br>Results
-    </a>
-    <a class="nav-link text-center" href="{{ url_for('admin_logout') }}">
-      <i class="bi bi-box-arrow-right"></i><br>Logout
-    </a>
-  </div>
+<!-- Bottom Animated Menu -->
+<nav id="bottomMenu">
+  <a href="{{ url_for('admin_dashboard') }}">
+    <i class="bi bi-speedometer2"></i>
+    Dashboard
+  </a>
+  <a href="{{ url_for('admin_results') }}" class="active">
+    <i class="bi bi-clipboard-data"></i>
+    Results
+  </a>
+  <a href="{{ url_for('admin_logout') }}">
+    <i class="bi bi-box-arrow-right"></i>
+    Logout
+  </a>
 </nav>
 {% endblock %}
