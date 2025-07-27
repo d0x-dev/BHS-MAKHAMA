@@ -9,6 +9,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&display=swap" rel="stylesheet">
 
   <style>
     :root {
@@ -63,87 +64,81 @@
       box-shadow: var(--shadow-strong);
     }
 
-    /* PM SHREE BHS animated logo */
+    /* Professional PM SHREE BHS Logo */
     .pmshree-logo {
       display: inline-flex;
       align-items: center;
-      gap: 2px;
-      font-weight: 800;
-      font-size: 1.25rem;
-      letter-spacing: .05rem;
-      line-height: 1;
-      color: #fff;
+      height: 100%;
       position: relative;
-      overflow: hidden;
-      padding: 0 4px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 1.35rem;
+      letter-spacing: 0.5px;
+      color: white;
+      text-transform: uppercase;
     }
+    
     .pmshree-logo span {
       display: inline-block;
+      position: relative;
       opacity: 0;
-      transform: translateY(100%) rotateX(-90deg);
-      transform-origin: bottom center;
+      transform: translateY(10px);
     }
+    
     .pmshree-logo.animate span {
-      animation: letterRise 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      animation: 
+        letterFadeIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards,
+        letterFloat 3s ease-in-out infinite;
     }
-    .pmshree-logo.animate span:nth-child(1) { animation-delay: 0.1s; }
-    .pmshree-logo.animate span:nth-child(2) { animation-delay: 0.2s; }
-    .pmshree-logo.animate span:nth-child(3) { animation-delay: 0.3s; }
-    .pmshree-logo.animate span:nth-child(4) { animation-delay: 0.4s; }
-    .pmshree-logo.animate span:nth-child(5) { animation-delay: 0.5s; }
-    .pmshree-logo.animate span:nth-child(6) { animation-delay: 0.6s; }
-    .pmshree-logo.animate span:nth-child(7) { animation-delay: 0.7s; }
-    .pmshree-logo.animate span:nth-child(8) { animation-delay: 0.8s; }
-    .pmshree-logo.animate span:nth-child(9) { animation-delay: 0.9s; }
-
-    @keyframes letterRise {
+    
+    /* Individual letter animation delays */
+    .pmshree-logo.animate span:nth-child(1) { animation-delay: 0.1s; } /* P */
+    .pmshree-logo.animate span:nth-child(2) { animation-delay: 0.15s; } /* M */
+    .pmshree-logo.animate span:nth-child(3) { animation-delay: 0.2s; } /* space */
+    .pmshree-logo.animate span:nth-child(4) { animation-delay: 0.25s; } /* S */
+    .pmshree-logo.animate span:nth-child(5) { animation-delay: 0.3s; } /* H */
+    .pmshree-logo.animate span:nth-child(6) { animation-delay: 0.35s; } /* R */
+    .pmshree-logo.animate span:nth-child(7) { animation-delay: 0.4s; } /* E */
+    .pmshree-logo.animate span:nth-child(8) { animation-delay: 0.45s; } /* E */
+    .pmshree-logo.animate span:nth-child(9) { animation-delay: 0.5s; } /* space */
+    .pmshree-logo.animate span:nth-child(10) { animation-delay: 0.55s; } /* B */
+    .pmshree-logo.animate span:nth-child(11) { animation-delay: 0.6s; } /* H */
+    .pmshree-logo.animate span:nth-child(12) { animation-delay: 0.65s; } /* S */
+    
+    @keyframes letterFadeIn {
       0% {
         opacity: 0;
-        transform: translateY(100%) rotateX(-90deg);
-        text-shadow: 0 0 10px rgba(255,255,255,0.5);
-      }
-      70% {
-        opacity: 1;
-        transform: translateY(-10%) rotateX(20deg);
-        text-shadow: 0 5px 15px rgba(255,255,255,0.8);
+        transform: translateY(10px);
       }
       100% {
         opacity: 1;
-        transform: translateY(0) rotateX(0);
-        text-shadow: 0 2px 5px rgba(255,255,255,0.3);
+        transform: translateY(0);
       }
     }
-
-    /* Wave effect after animation completes */
-    .pmshree-logo.animate::after {
+    
+    @keyframes letterFloat {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-2px);
+      }
+    }
+    
+    /* Subtle underline effect */
+    .pmshree-logo::after {
       content: '';
       position: absolute;
-      top: 0;
+      bottom: -4px;
       left: 0;
+      width: 0;
+      height: 2px;
+      background: white;
+      transition: width 0.6s ease 1s;
+    }
+    
+    .pmshree-logo.animate::after {
       width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, 
-        rgba(255,255,255,0) 0%,
-        rgba(255,255,255,0.3) 50%,
-        rgba(255,255,255,0) 100%);
-      transform: translateX(-100%);
-      animation: waveShine 1.5s ease-in-out 1.2s forwards;
-    }
-
-    @keyframes waveShine {
-      0% { transform: translateX(-100%); }
-      100% { transform: translateX(100%); }
-    }
-
-    /* Glow pulse effect */
-    @keyframes glowPulse {
-      0%, 100% { text-shadow: 0 0 5px rgba(255,255,255,0.3); }
-      50% { text-shadow: 0 0 15px rgba(255,255,255,0.7); }
-    }
-
-    .pmshree-logo.animate span:nth-child(1),
-    .pmshree-logo.animate span:nth-child(9) {
-      animation: glowPulse 2s ease-in-out infinite 1.5s;
     }
 
     .theme-toggle {
@@ -333,7 +328,10 @@
   <!-- Top App Bar -->
   <div class="app-header">
     <span class="pmshree-logo" id="pmshreeLogo">
-      <span>P</span><span>M</span><span> </span><span>S</span><span>H</span><span>R</span><span>E</span><span>E</span><span> </span><span>B</span><span>H</span><span>S</span>
+      <span>P</span><span>M</span><span>&nbsp;</span>
+      <span>S</span><span>H</span><span>R</span><span>E</span><span>E</span>
+      <span>&nbsp;</span>
+      <span>B</span><span>H</span><span>S</span>
     </span>
     <div class="d-flex align-items-center">
       <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme"></button>
