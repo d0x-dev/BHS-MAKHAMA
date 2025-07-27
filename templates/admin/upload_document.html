@@ -1,158 +1,135 @@
 {% extends "base.html" %}
 {% set hide_header = True %}
 
-{% block title %}Upload Document - Admin{% endblock %}
+{% block title %}Upload Class Work - Admin{% endblock %}
 
 {% block content %}
-<style>
-  :root {
-    --ripple-color: rgba(255, 255, 255, 0.35);
-  }
+<div class="container mt-4" style="padding-bottom: 100px;">
+    <h2 class="mb-4 text-center">Upload Class Work</h2>
 
-  /* Ripple Effect */
-  .ripple {
-    position: relative;
-    overflow: hidden;
-  }
-  .ripple span.ripple-ink {
-    position: absolute;
-    border-radius: 50%;
-    transform: scale(0);
-    animation: ripple 0.6s linear;
-    background-color: var(--ripple-color);
-  }
-  @keyframes ripple {
-    to {
-      transform: scale(4);
-      opacity: 0;
-    }
-  }
-
-  /* Card Style */
-  .upload-card {
-    border: 0;
-    border-radius: 14px;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-  }
-  .upload-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
-  }
-
-  /* Bottom Menu */
-  .nav-link {
-    font-size: 0.8rem;
-    color: var(--bs-body-color);
-  }
-  #bottomMenu {
-    background-color: var(--bs-body-bg);
-    border-top: 1px solid var(--bs-border-color);
-  }
-  body.dark-mode #bottomMenu {
-    background-color: #1a1a1a;
-    border-top: 1px solid #333;
-  }
-  body.dark-mode .nav-link {
-    color: #eee;
-  }
-
-  /* Dark Mode for form elements */
-  body.dark-mode .upload-card,
-  body.dark-mode .form-control,
-  body.dark-mode .form-select {
-    background-color: #1f1f1f;
-    color: white;
-    border-color: #444;
-  }
-  body.dark-mode label,
-  body.dark-mode .form-text {
-    color: #ccc;
-  }
-</style>
-
-<div class="container mt-4 mb-5" style="padding-bottom: 100px;">
-  <div class="row justify-content-center">
-    <div class="col-lg-8">
-      <h2 class="mb-4 text-center">Upload Document</h2>
-
-      <!-- Flash Messages -->
-      {% with messages = get_flashed_messages(with_categories=true) %}
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-          {% for category, message in messages %}
-            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-              {{ message }}
-              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-          {% endfor %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
         {% endif %}
-      {% endwith %}
+    {% endwith %}
 
-      <!-- Upload Card -->
-      <div class="card upload-card p-3 shadow-sm ripple">
-        <div class="card-header bg-info text-white">
-          <h4 class="mb-0"><i class="bi bi-file-earmark-arrow-up"></i> Upload Document</h4>
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-upload"></i> New Class Work</h5>
         </div>
         <div class="card-body">
-          <form method="POST" action="{{ url_for('upload_document') }}" enctype="multipart/form-data">
-            <div class="mb-3">
-              <label for="name" class="form-label">Document Name <span class="text-danger">*</span></label>
-              <input type="text" class="form-control" id="name" name="name" required>
-            </div>
-            <div class="mb-3">
-              <label for="category" class="form-label">Category <span class="text-danger">*</span></label>
-              <input type="text" class="form-control" id="category" name="category" required>
-            </div>
-            <div class="mb-4">
-              <label for="file" class="form-label">Document File <span class="text-danger">*</span></label>
-              <input type="file" class="form-control" id="file" name="file" required>
-              <div class="form-text">Allowed: PDF, DOC, DOCX, XLS, XLSX, JPG, JPEG, PNG (Max 10MB)</div>
-            </div>
-
-            <div class="d-grid gap-2">
-              <button type="submit" class="btn btn-info btn-lg ripple">
-                <i class="bi bi-upload"></i> Upload Document
-              </button>
-              <a href="{{ url_for('documents') }}" class="btn btn-secondary btn-lg ripple">
-                <i class="bi bi-arrow-left"></i> Back to Documents
-              </a>
-            </div>
-          </form>
+            <form method="POST" enctype="multipart/form-data" action="{{ url_for('upload_classwork') }}">
+                <div class="mb-3">
+                    <label for="class_name" class="form-label">Class</label>
+                    <select class="form-select" id="class_name" name="class_name" required>
+                        <option value="">Select Class</option>
+                        <option value="9th">9th</option>
+                        <option value="10th">10th</option>
+                        <option value="11th">11th</option>
+                        <option value="12th">12th</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="subject" class="form-label">Subject</label>
+                    <input type="text" class="form-control" id="subject" name="subject" required>
+                </div>
+                <div class="mb-3">
+                    <label for="title" class="form-label">Title</label>
+                    <input type="text" class="form-control" id="title" name="title" required>
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="due_date" class="form-label">Due Date (optional)</label>
+                    <input type="date" class="form-control" id="due_date" name="due_date">
+                </div>
+                <div class="mb-4">
+                    <label for="file" class="form-label">File</label>
+                    <input class="form-control" type="file" id="file" name="file" accept=".pdf,.doc,.docx,.ppt,.pptx">
+                    <div class="form-text">Allowed formats: PDF, DOC, DOCX, PPT, PPTX</div>
+                </div>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-upload"></i> Upload Class Work
+                    </button>
+                </div>
+            </form>
         </div>
-      </div>
     </div>
-  </div>
 </div>
 
 <!-- Bottom Menu -->
-<nav class="navbar navbar-expand fixed-bottom shadow-sm" id="bottomMenu">
-  <div class="container justify-content-around">
-    <a class="nav-link text-center" href="{{ url_for('admin_dashboard') }}">
-      <i class="bi bi-speedometer2"></i><br>Dashboard
-    </a>
-    <a class="nav-link text-center active" href="{{ url_for('upload_document') }}">
-      <i class="bi bi-file-earmark"></i><br>Documents
-    </a>
-    <a class="nav-link text-center" href="{{ url_for('admin_logout') }}">
-      <i class="bi bi-box-arrow-right"></i><br>Logout
-    </a>
-  </div>
+<nav class="navbar navbar-expand fixed-bottom bg-light shadow-sm">
+    <div class="container justify-content-around">
+        <a class="nav-link text-center" href="{{ url_for('admin_dashboard') }}">
+            <i class="bi bi-speedometer2"></i><br>Dashboard
+        </a>
+        <a class="nav-link text-center active" href="{{ url_for('upload_classwork') }}">
+            <i class="bi bi-upload"></i><br>Class Work
+        </a>
+        <a class="nav-link text-center" href="{{ url_for('admin_logout') }}">
+            <i class="bi bi-box-arrow-right"></i><br>Logout
+        </a>
+    </div>
 </nav>
 
-<script>
-  // Ripple Effect
-  document.addEventListener('click', function (e) {
-    const target = e.target.closest('.ripple');
-    if (!target) return;
-
-    const rect = target.getBoundingClientRect();
-    const ink = document.createElement('span');
-    ink.classList.add('ripple-ink');
-    ink.style.left = (e.clientX - rect.left) + 'px';
-    ink.style.top = (e.clientY - rect.top) + 'px';
-    ink.style.width = ink.style.height = Math.max(rect.width, rect.height) + 'px';
-    target.appendChild(ink);
-    setTimeout(() => ink.remove(), 600);
-  }, false);
-</script>
+<style>
+    .navbar.fixed-bottom {
+        z-index: 1030;
+        border-top: 1px solid rgba(0,0,0,.1);
+        padding: 0.5rem 0;
+        background-color: #f8f9fa;
+    }
+    
+    .nav-link {
+        font-size: 0.8rem;
+        color: #495057;
+        padding: 0.5rem;
+        transition: all 0.2s ease;
+    }
+    
+    .nav-link.active {
+        color: #0d6efd;
+        font-weight: 500;
+    }
+    
+    .nav-link:hover {
+        color: #0d6efd;
+    }
+    
+    /* Dark mode styles */
+    body.dark-mode .navbar.fixed-bottom {
+        background-color: #1a1a1a !important;
+        border-top: 1px solid #333;
+    }
+    
+    body.dark-mode .nav-link {
+        color: #eee;
+    }
+    
+    body.dark-mode .nav-link.active {
+        color: #3d8bfd;
+    }
+    
+    body.dark-mode .card,
+    body.dark-mode .form-control,
+    body.dark-mode .form-select {
+        background-color: #1f1f1f;
+        color: white;
+        border-color: #444;
+    }
+    
+    body.dark-mode label,
+    body.dark-mode .form-text {
+        color: #ccc;
+    }
+</style>
 {% endblock %}
