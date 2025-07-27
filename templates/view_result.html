@@ -148,113 +148,6 @@
   .action-bar { justify-content: center; }
   .marks-table { font-size: 0.8rem; }
 }
-
-/* ======================== PRINT STYLES ======================== */
-@media print {
-  @page {
-    size: A4 portrait;
-    margin: 10mm 8mm; /* tighter to keep it on 1 page */
-  }
-
-  html, body {
-    background: white !important;
-    color: black !important;
-    font-size: 11pt; /* compact to fit one page */
-  }
-
-  .screen-only { display: none !important; }
-  .print-only { display: block !important; }
-
-  .container {
-    width: 100% !important;
-    max-width: 100% !important;
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-
-  .app-header, .bottom-nav, .flash-stack, .action-bar, .back-section {
-    display: none !important;
-  }
-
-  .result-wrap {
-    padding: 0 !important;
-  }
-
-  .marks-card {
-    box-shadow: none !important;
-    border: none !important;
-    border-radius: 0 !important;
-    margin: 0 !important;
-    transform: none !important;
-  }
-
-  .brand-header {
-    background: #0d6efd !important;
-    color: white !important;
-    font-size: 1.2rem !important;
-    padding: 0.6rem 0.8rem !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  .institute-details {
-    font-size: 0.85rem !important;
-    padding: 0.25rem 0 !important;
-  }
-
-  .info-grid {
-    grid-template-columns: repeat(3, 1fr) !important;
-    gap: 0.25rem 0.75rem !important;
-    padding: 0.6rem 0.8rem !important;
-    font-size: 0.9rem !important;
-  }
-
-  .info-label { font-size: 0.8rem !important; }
-  .info-value { font-size: 0.9rem !important; }
-
-  .marks-table {
-    font-size: 0.9rem !important;
-    width: 100%;
-    margin-top: 0.2rem !important;
-  }
-
-  .marks-table thead th {
-    background: #f1f1f1 !important;
-    padding: 0.45rem !important;
-    font-size: 0.95rem !important;
-  }
-
-  .marks-table tbody td {
-    padding: 0.45rem !important;
-    font-size: 0.9rem !important;
-  }
-
-  .result-badge {
-    font-size: 0.9rem !important;
-    padding: 0.15rem 0.55rem !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  .text-center.small {
-    font-size: 0.8rem !important;
-    margin-top: 0.6rem !important;
-  }
-
-  .d-flex.justify-content-around {
-    justify-content: center !important;
-    margin-top: 0.8rem !important;
-  }
-
-  .border-top {
-    border-top: 1.5px solid black !important;
-    font-weight: bold !important;
-    text-align: center !important;
-    width: 140px !important;
-    margin: auto !important;
-    padding-top: 0.35rem !important;
-  }
-}
 </style>
 
 {% set badge_class = (
@@ -313,11 +206,8 @@
     </div>
 
     <div class="action-bar screen-only">
-      <button class="btn btn-primary btn-sm action-btn" id="btnPrint">
-        <i class="bi bi-printer-fill"></i> Print
-      </button>
-      <button class="btn btn-outline-secondary btn-sm action-btn" id="btnShare">
-        <i class="bi bi-share"></i> Share
+      <button class="btn btn-primary btn-sm action-btn" id="btnDownload">
+        <i class="bi bi-download"></i> Download PDF
       </button>
       <button class="btn btn-outline-info btn-sm action-btn ms-auto" id="btnCompact">
         <i class="bi bi-arrows-collapse"></i> Compact View
@@ -370,28 +260,23 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  document.getElementById('btnPrint')?.addEventListener('click', function () {
-    window.print();
+  // PDF Download Handler
+  document.getElementById('btnDownload')?.addEventListener('click', function() {
+    const url = "{{ url_for('student_download_marksheet', exam_id=exam.id, roll_number=student.roll_number) }}";
+    
+    // Create hidden iframe for download
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = url;
+    document.body.appendChild(iframe);
+    
+    // Remove iframe after download
+    setTimeout(() => {
+      document.body.removeChild(iframe);
+    }, 5000);
   });
 
-  document.getElementById('btnShare')?.addEventListener('click', async function () {
-    try {
-      const shareData = {
-        title: 'My Academic Result',
-        text: `Check out my result from {{ student.name }}`,
-        url: window.location.href
-      };
-      if (navigator.share) {
-        await navigator.share(shareData);
-      } else {
-        await navigator.clipboard.writeText(window.location.href);
-        alert('Result link copied to clipboard!');
-      }
-    } catch (err) {
-      console.error('Error sharing:', err);
-    }
-  });
-
+  // Compact View Toggle
   document.getElementById('btnCompact')?.addEventListener('click', function () {
     const card = document.getElementById('marksCard');
     const isCompact = card.classList.toggle('compact-view');
