@@ -5,19 +5,180 @@
 
 {% block content %}
 <style>
-  /* ... (keep all your existing styles) ... */
+  :root{
+    --primary: #0d6efd;
+    --primary-dark: #0b5ed7;
+    --primary-gradient: linear-gradient(135deg,#0d6efd 0%,#5b8cff 100%);
+    --info-gradient: linear-gradient(135deg,#0dcaf0 0%,#00a2d6 100%);
+    --danger-gradient: linear-gradient(135deg,#ff416c 0%,#ff4b2b 100%);
+    --surface: #ffffff;
+    --surface-alt: #f8f9fa;
+    --on-surface: #212529;
+    --muted: #6c757d;
+    --border: rgba(0,0,0,.08);
+    --radius: 18px;
+    --shadow: 0 6px 18px rgba(0,0,0,.08);
+    --shadow-strong: 0 12px 28px rgba(0,0,0,.12);
 
-  /* Add this new style for download section */
-  .download-section {
-    background: #f8f9fa;
-    border-radius: 8px;
-    padding: 15px;
-    margin-top: 20px;
-    border: 1px dashed #ccc;
+    /* bottom admin nav height */
+    --admin-bottom-h: 64px;
+    --ripple-color: rgba(255,255,255,.35);
+  }
+  [data-bs-theme="dark"]{
+    --surface: #1e1e1e;
+    --surface-alt: #252525;
+    --on-surface: #f1f1f1;
+    --muted: #adb5bd;
+    --border: rgba(255,255,255,.06);
+    --shadow: 0 6px 18px rgba(0,0,0,.28);
+    --shadow-strong: 0 12px 28px rgba(0,0,0,.34);
+  }
+
+  /* page spacing so the bottom menu never overlaps */
+  .admin-page-wrap{
+    padding-bottom: calc(var(--admin-bottom-h) + 24px);
+  }
+
+  .page-title{
+    font-weight: 700;
+    font-size: 1.15rem;
+    margin-bottom: .85rem;
+  }
+
+  .card{
+    border: none;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    background: var(--surface);
+    color: var(--on-surface);
+  }
+
+  .card-header{
+    border: 0;
+    border-radius: var(--radius) var(--radius) 0 0;
+    font-weight: 600;
+    box-shadow: inset 0 -1px 0 rgba(255,255,255,.06);
+  }
+
+  .subject-pill{
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: none;
+    transition: box-shadow .15s ease, transform .15s ease;
+  }
+  .subject-pill:hover{
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(0,0,0,.08);
+  }
+
+  .pdf-download-btn{
+    background: var(--danger-gradient);
+    color: #fff !important;
+    border: 0;
+    border-radius: 999px;
+    padding: .3rem .75rem;
+  }
+  .pdf-download-btn i{
+    vertical-align: -1px;
+  }
+
+  .download-section{
+    background: var(--surface-alt);
+    border-radius: 12px;
+    padding: 14px;
+    margin-top: 10px;
+    border: 1px dashed var(--border);
+  }
+
+  /* ================= Bottom Admin Menu (animated, android style) ================ */
+  #adminBottom{
+    position: fixed;
+    inset: auto 0 0 0;
+    height: var(--admin-bottom-h);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -4px 16px rgba(0,0,0,.03);
+    z-index: 1040;
+    backdrop-filter: blur(6px);
+  }
+  [data-bs-theme="dark"] #adminBottom{
+    background: #1a1a1a;
+    border-color: rgba(255,255,255,.06);
+    box-shadow: 0 -4px 16px rgba(0,0,0,.22);
+  }
+
+  .admin-link{
+    text-decoration: none;
+    color: var(--muted);
+    font-size: .78rem;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:2px;
+    width: 33.33%;
+    height:100%;
+    position:relative;
+    transition: color .18s cubic-bezier(.2,.8,.2,1);
+  }
+  .admin-link i{
+    font-size:1.25rem;
+    line-height:1;
+  }
+  .admin-link.active{
+    color: var(--primary);
+    font-weight:600;
+  }
+  .admin-link::after{
+    content:'';
+    position:absolute;
+    top:0;
+    left:50%;
+    transform:translateX(-50%) scaleX(0);
+    width: 56%;
+    height:2px;
+    background: var(--primary);
+    border-radius: 999px;
+    transition: transform .18s cubic-bezier(.2,.8,.2,1);
+  }
+  .admin-link.active::after{
+    transform: translateX(-50%) scaleX(1);
+  }
+
+  /* ripple */
+  .ripple{
+    position: relative;
+    overflow: hidden;
+  }
+  .ripple span.r-ink{
+    position: absolute;
+    border-radius: 50%;
+    transform: scale(0);
+    animation: ripple .6s linear;
+    background-color: var(--ripple-color);
+  }
+  @keyframes ripple{
+    to{
+      transform: scale(4);
+      opacity: 0;
+    }
+  }
+
+  /* Helpers */
+  .btn-danger{
+    background: #dc3545;
+    border-color: #dc3545;
+  }
+  .btn-danger:hover{
+    background: #c82333;
+    border-color: #bd2130;
   }
 </style>
 
-<div class="container mt-3 mb-5">
+<div class="admin-page-wrap container mt-3 mb-5">
   <h2 class="page-title">Add Student to {{ exam.exam_name }} (Class {{ exam.class }})</h2>
 
   {% with messages = get_flashed_messages(with_categories=true) %}
@@ -26,9 +187,9 @@
         <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
           {{ message }}
           {% if category == 'success' and pdf_url %}
-            <div class="download-section mt-2">
+            <div class="download-section">
               <strong>Download Marksheet:</strong>
-              <a href="{{ pdf_url }}" class="btn btn-sm pdf-download-btn ms-2" download>
+              <a href="{{ pdf_url }}" class="btn btn-sm pdf-download-btn ms-2 ripple" download>
                 <i class="bi bi-file-earmark-pdf"></i> PDF Format
               </a>
             </div>
@@ -39,7 +200,8 @@
     {% endif %}
   {% endwith %}
 
-  <div class="card shadow mb-4">
+  <!-- ======================= Student & Subjects Form ======================= -->
+  <div class="card shadow mb-4 reveal">
     <div class="card-header text-white" style="background: var(--primary-gradient);">
       <i class="bi bi-person-plus"></i> Student Details
     </div>
@@ -47,7 +209,7 @@
       <form method="POST">
         <div class="row g-3 mb-4">
           <div class="col-md-6">
-            <label class="form-label">Student Name</label>
+          <label class="form-label">Student Name</label>
             <input type="text" name="name" class="form-control" required>
           </div>
           <div class="col-md-6">
@@ -55,7 +217,7 @@
             <input type="text" name="roll_number" class="form-control" required>
           </div>
         </div>
-        
+
         <h5 class="mb-3">Subjects</h5>
         <div id="subjectsContainer">
           <div class="subject-pill card mb-3">
@@ -74,7 +236,7 @@
                   <input type="number" name="total_marks_0" class="form-control" required>
                 </div>
                 <div class="col-md-1 d-flex align-items-end">
-                  <button type="button" class="btn btn-danger remove-subject">
+                  <button type="button" class="btn btn-danger remove-subject ripple" aria-label="Remove subject row">
                     <i class="bi bi-trash"></i>
                   </button>
                 </div>
@@ -82,31 +244,31 @@
             </div>
           </div>
         </div>
-        
-        <button type="button" id="addSubject" class="btn btn-primary mb-4">
+
+        <button type="button" id="addSubject" class="btn btn-primary mb-4 ripple">
           <i class="bi bi-plus-circle"></i> Add Subject
         </button>
-        
+
         <div class="d-grid gap-2">
-          <button type="submit" class="btn btn-success btn-lg">
+          <button type="submit" class="btn btn-success btn-lg ripple">
             <i class="bi bi-save"></i> Save Student
           </button>
-          <a href="{{ url_for('admin_results') }}" class="btn btn-outline-secondary">
+          <a href="{{ url_for('admin_results') }}" class="btn btn-outline-secondary ripple">
             <i class="bi bi-arrow-left"></i> Back to Results
           </a>
         </div>
       </form>
     </div>
   </div>
-  
+
   {% if exam.students %}
-  <div class="card shadow">
+  <div class="card shadow reveal">
     <div class="card-header text-white" style="background: var(--info-gradient);">
       <i class="bi bi-people-fill"></i> Students in This Exam
     </div>
     <div class="card-body">
       <div class="table-responsive">
-        <table class="table table-hover table-bordered">
+        <table class="table table-hover table-bordered align-middle">
           <thead>
             <tr>
               <th>Roll No</th>
@@ -124,8 +286,8 @@
               <td>{{ student.total_obtained }}/{{ student.total_max }}</td>
               <td>{{ "%.2f"|format(student.percentage) }}%</td>
               <td>
-                <a href="{{ url_for('download_marksheet', exam_id=exam.id, roll_number=student.roll_number) }}" 
-                   class="btn btn-sm pdf-download-btn" download>
+                <a href="{{ url_for('download_marksheet', exam_id=exam.id, roll_number=student.roll_number) }}"
+                   class="btn btn-sm pdf-download-btn ripple" download>
                   <i class="bi bi-download"></i> Download
                 </a>
               </td>
@@ -139,19 +301,20 @@
   {% endif %}
 </div>
 
-<!-- Bottom Menu -->
-<nav class="navbar navbar-expand fixed-bottom shadow-sm" id="bottomMenu">
-  <div class="container justify-content-around">
-    <a class="nav-link text-center" href="{{ url_for('admin_dashboard') }}">
-      <i class="bi bi-speedometer2"></i><br>Dashboard
-    </a>
-    <a class="nav-link text-center active" href="{{ url_for('admin_results') }}">
-      <i class="bi bi-clipboard-data"></i><br>Results
-    </a>
-    <a class="nav-link text-center" href="{{ url_for('admin_logout') }}">
-      <i class="bi bi-box-arrow-right"></i><br>Logout
-    </a>
-  </div>
+<!-- ======================= Animated Admin Bottom Menu ======================= -->
+<nav id="adminBottom">
+  <a class="admin-link ripple" href="{{ url_for('admin_dashboard') }}">
+    <i class="bi bi-speedometer2"></i>
+    <span>Dashboard</span>
+  </a>
+  <a class="admin-link ripple active" href="{{ url_for('admin_results') }}">
+    <i class="bi bi-clipboard-data"></i>
+    <span>Results</span>
+  </a>
+  <a class="admin-link ripple" href="{{ url_for('admin_logout') }}">
+    <i class="bi bi-box-arrow-right"></i>
+    <span>Logout</span>
+  </a>
 </nav>
 
 <script>
@@ -179,7 +342,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <input type="number" name="total_marks_${subjectCount}" class="form-control" required>
           </div>
           <div class="col-md-1 d-flex align-items-end">
-            <button type="button" class="btn btn-danger remove-subject">
+            <button type="button" class="btn btn-danger remove-subject ripple" aria-label="Remove subject row">
               <i class="bi bi-trash"></i>
             </button>
           </div>
@@ -193,9 +356,43 @@ document.addEventListener('DOMContentLoaded', function() {
   addSubjectBtn.addEventListener('click', addSubject);
 
   document.addEventListener('click', function(e) {
-    if (e.target.closest('.remove-subject')) {
-      e.target.closest('.subject-pill').remove();
+    const btn = e.target.closest('.remove-subject');
+    if (btn) {
+      e.preventDefault();
+      btn.closest('.subject-pill').remove();
     }
+  });
+
+  // ripple effect
+  document.addEventListener('click', function(e){
+    const target = e.target.closest('.ripple');
+    if(!target) return;
+
+    const rect = target.getBoundingClientRect();
+    const ink = document.createElement('span');
+    ink.classList.add('r-ink');
+    ink.style.left = (e.clientX - rect.left) + 'px';
+    ink.style.top  = (e.clientY - rect.top)  + 'px';
+    ink.style.width = ink.style.height = Math.max(rect.width, rect.height) + 'px';
+    target.appendChild(ink);
+    setTimeout(()=> ink.remove(), 600);
+  }, false);
+
+  // reveal animation like dashboard
+  const reveals = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(en=>{
+      if(en.isIntersecting){
+        en.target.style.opacity = 1;
+        en.target.style.transform = 'translateY(0)';
+        io.unobserve(en.target);
+      }
+    });
+  },{threshold:.08});
+  reveals.forEach(el=>{
+    el.style.opacity=0;
+    el.style.transform='translateY(8px)';
+    io.observe(el);
   });
 });
 </script>
