@@ -3,10 +3,82 @@
 {% block title %}View Results{% endblock %}
 
 {% block content %}
+<style>
+  :root {
+    --primary-gradient: linear-gradient(135deg, #0d6efd, #5b8cff);
+    --soft-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    --card-radius: 12px;
+  }
+
+  .page-title {
+    font-weight: 700;
+    font-size: 1.5rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    animation: fadeInDown 0.4s ease;
+  }
+
+  .card {
+    border: none;
+    border-radius: var(--card-radius);
+    box-shadow: var(--soft-shadow);
+    animation: fadeIn 0.4s ease;
+  }
+
+  .card-header {
+    border: none;
+    border-radius: var(--card-radius) var(--card-radius) 0 0;
+    background: var(--primary-gradient);
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+
+  .form-label {
+    font-weight: 500;
+  }
+
+  .btn-primary {
+    background: var(--primary-gradient);
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: transform 0.2s ease;
+  }
+  .btn-primary:active { transform: scale(0.97); }
+
+  .list-group-item {
+    border: none;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 15px 10px;
+    transition: background 0.2s;
+  }
+  .list-group-item:last-child {
+    border-bottom: none;
+  }
+  .list-group-item:hover {
+    background: #f8f9fa;
+  }
+
+  .badge {
+    font-size: 0.75rem;
+    padding: 6px 10px;
+  }
+
+  @keyframes fadeInDown {
+    from {opacity: 0; transform: translateY(-10px);}
+    to {opacity: 1; transform: translateY(0);}
+  }
+  @keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+  }
+</style>
+
 <div class="container py-4">
-  <h2 class="text-center mb-4">Available Results</h2>
+  <h2 class="page-title">Available Results</h2>
   
-  <div class="card mb-4 shadow">
+  <!-- Search Card -->
+  <div class="card mb-4">
     <div class="card-body">
       <form method="POST" class="row g-3">
         <div class="col-md-4">
@@ -35,29 +107,30 @@
     </div>
   </div>
   
+  <!-- Results List -->
   {% if results %}
-  <div class="card shadow">
-    <div class="card-header bg-info text-white">
-      <h5 class="mb-0">All Exams</h5>
+  <div class="card">
+    <div class="card-header text-white">
+      <h5 class="mb-0"><i class="bi bi-card-list"></i> All Exams</h5>
     </div>
-    <div class="card-body">
-      <div class="list-group">
+    <div class="card-body p-0">
+      <div class="list-group list-group-flush">
         {% for exam in results %}
-        <div class="list-group-item">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h5 class="mb-1">{{ exam.exam_name }}</h5>
-              <small class="text-muted">Class {{ exam.class }} • {{ exam.exam_date }}</small>
-            </div>
-            <span class="badge bg-primary rounded-pill">{{ exam.students|length }} students</span>
+        <div class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="mb-1">{{ exam.exam_name }}</h6>
+            <small class="text-muted">Class {{ exam.class }} • {{ exam.exam_date }}</small>
           </div>
+          <span class="badge bg-primary">{{ exam.students|length }} students</span>
         </div>
         {% endfor %}
       </div>
     </div>
   </div>
   {% else %}
-  <div class="alert alert-info">No results available yet</div>
+  <div class="alert alert-info text-center shadow-sm mt-3">
+    <i class="bi bi-info-circle"></i> No results available yet
+  </div>
   {% endif %}
 </div>
 {% endblock %}
