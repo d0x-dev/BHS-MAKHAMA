@@ -5,108 +5,39 @@
 
 {% block content %}
 <style>
-  :root {
-    --soft-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    --primary-gradient: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-    --success-gradient: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-    --info-gradient: linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%);
-  }
+  /* ... (keep all your existing styles) ... */
 
-  .page-title {
-    font-weight: 700;
-    font-size: 1.4rem;
-    text-align: center;
-    margin-bottom: 1rem;
-    animation: fadeInDown 0.4s ease;
-  }
-
-  .card {
-    border: none;
-    border-radius: 12px;
-    box-shadow: var(--soft-shadow);
-    animation: fadeIn 0.4s ease;
-  }
-
-  .card-header {
-    font-size: 1rem;
-    font-weight: 600;
-    border: none;
-  }
-
-  .form-control {
+  /* Add this new style for download section */
+  .download-section {
+    background: #f8f9fa;
     border-radius: 8px;
-    padding: 0.5rem 0.75rem;
-    font-size: 0.95rem;
-  }
-
-  .btn {
-    border-radius: 8px;
-    font-weight: 600;
-    transition: all 0.2s ease;
-  }
-  .btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
-  }
-  .btn:active {
-    transform: scale(0.97);
-  }
-
-  .btn-success {
-    background: var(--success-gradient);
-    border: none;
-  }
-  .btn-primary {
-    background: var(--primary-gradient);
-    border: none;
-  }
-  .btn-danger {
-    background: linear-gradient(135deg, #ff416c, #ff4b2b);
-    border: none;
-  }
-
-  /* Student Table */
-  .table thead {
-    background: var(--info-gradient);
-    color: white;
-  }
-  .table th, .table td {
-    vertical-align: middle;
-    text-align: center;
-  }
-  .table-hover tbody tr:hover {
-    background-color: rgba(0, 123, 255, 0.05);
-  }
-
-  /* Bottom Menu */
-  #bottomMenu {
-    background-color: var(--bs-body-bg);
-    border-top: 1px solid var(--bs-border-color);
-  }
-  .nav-link {
-    font-size: 0.8rem;
-    color: var(--bs-body-color);
-  }
-  body.dark-mode #bottomMenu {
-    background-color: #1a1a1a;
-    border-top: 1px solid #333;
-  }
-  body.dark-mode .nav-link {
-    color: #eee;
-  }
-
-  @keyframes fadeInDown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    padding: 15px;
+    margin-top: 20px;
+    border: 1px dashed #ccc;
   }
 </style>
 
 <div class="container mt-3 mb-5">
   <h2 class="page-title">Add Student to {{ exam.exam_name }} (Class {{ exam.class }})</h2>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          {% if category == 'success' and pdf_url %}
+            <div class="download-section mt-2">
+              <strong>Download Marksheet:</strong>
+              <a href="{{ pdf_url }}" class="btn btn-sm pdf-download-btn ms-2" download>
+                <i class="bi bi-file-earmark-pdf"></i> PDF Format
+              </a>
+            </div>
+          {% endif %}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
 
   <div class="card shadow mb-4">
     <div class="card-header text-white" style="background: var(--primary-gradient);">
@@ -182,6 +113,7 @@
               <th>Name</th>
               <th>Total Marks</th>
               <th>Percentage</th>
+              <th>Marksheet</th>
             </tr>
           </thead>
           <tbody>
@@ -191,6 +123,12 @@
               <td>{{ student.name }}</td>
               <td>{{ student.total_obtained }}/{{ student.total_max }}</td>
               <td>{{ "%.2f"|format(student.percentage) }}%</td>
+              <td>
+                <a href="{{ url_for('download_marksheet', exam_id=exam.id, roll_number=student.roll_number) }}" 
+                   class="btn btn-sm pdf-download-btn" download>
+                  <i class="bi bi-download"></i> Download
+                </a>
+              </td>
             </tr>
             {% endfor %}
           </tbody>
